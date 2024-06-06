@@ -8,7 +8,7 @@ st.title("")
 
 sql_file = st.file_uploader("**Upload your SQL**", type="sql", accept_multiple_files=False,key='sql')
 
-with st.form("form_calculator", border=False):
+with st.form("form_calculator", border=False, clear_on_submit=True):
     notify_sql = st.container()
     worked = False
     if sql_file:
@@ -32,14 +32,16 @@ with st.form("form_calculator", border=False):
             if not csv_file:
                 notify_csv.error("You **must** insert a CSV file to calculate", icon='⚠️')
             else:
-                filename = csv_file.name
-                progress_text = "Calculating Heat Exchange Index (deppending on the file size, this might take a while)"
+                progress_text = "Seting up files (deppending on the files size, this might take a while)"
                 progress_bar = st.progress(0, text=progress_text)
+                use_zones = "All" if not zone_option else zone_option
                 try:
                     df = pd.read_csv(csv_file)
-                    progress_bar.progress(60, text=progress_text)
+                    generate_df(input_dataframe=df, filename=csv_file.name, way=type_option, type_name=f"_{type_option}_", coverage=coverage_option, zone=use_zones, pbar=progress_bar)
+                    progress_bar.progress(100, "Done")
+                    globed = glob(f"{output_path}*.csv")
+                    df = pd.read_csv(globed[0])
                     st.dataframe(df)
-                    progress_bar.progress(100, text="Finished")
                     progress_bar.empty()
                 except:
                     notify_csv.error("An error occured while processing the CSV", icon='⚠️')

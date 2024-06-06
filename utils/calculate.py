@@ -32,10 +32,10 @@ ROOF = 'Roof'
 
 output_path = r'output/'
 cache_path = r'cache/'
+db_path = r'cache/database.sql'
 
 
 def save_and_connect_sql(file):
-    db_path = f"{cache_path}database.sql"
     with open(db_path, "wb") as f:
         f.write(file.getbuffer())
     conn = sqlite3.connect(db_path)
@@ -51,13 +51,16 @@ def read_db_for_zones(connection: sqlite3.Connection) -> list:
     return result
 
 
-def read_db_and_build_dicts(selected_zones, way: str) -> dict:
+def read_db_and_build_dicts(selected_zones, way: str, pbar: st.progress) -> dict:
     """Lê o arquivo .sql e constrói
     os dicionários de valores que aparecem nas planilhas
     e valores em que se transformam.
     selected_zones: "All" ou lista de zonas
-    way: convection ou surface"""
-    conn = sqlite3.connect(f'{cache_path}database.sql')
+    way: convection ou surface
+    pbar: barra de progresso
+    """
+    pbar.progress(8, "Connecting to the SQL and reading the tables...")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     if selected_zones != 'All':
         selected_zones = ', '.join(f'"{zona}"' for zona in selected_zones)
@@ -105,6 +108,7 @@ def read_db_and_build_dicts(selected_zones, way: str) -> dict:
                     surfaces_dict[key].at[idx, 'ClassName'] = 'Roof'
     cursor.close()
     conn.close()
+    pbar.progress(14, "Building utility objects from SQL data...")
     dicionario = {}
     for zone, dataframe in surfaces_dict.items():
         dicionario[zone] = {'convection': {}, 'surface': {}}
@@ -137,22 +141,24 @@ def read_db_and_build_dicts(selected_zones, way: str) -> dict:
     return dicionario
 
 
-def rename_cols(columns_list: list, df: pd.DataFrame, way: str, dicionario: dict) -> pd.DataFrame:
+def rename_cols(columns_list: list, df: pd.DataFrame, way: str, dicionario: dict, pbar: st.progress) -> pd.DataFrame:
     """Renomeia todas as colunas e gera as listas de configurações"""
     wanted_list = ['drybulb?temp_ext', 'Date/Time']
+    pbar.progress(16, "Renaming columns...")
     for specific_zone in dicionario:
         for item in columns_list:
                 for new_name in dicionario[specific_zone][way]:
                     if new_name in item:
                         oficial = f"{specific_zone}_{dicionario[specific_zone][way][new_name]}"
-                        df.rename(columns={item: oficial}, inplace=True)
+                        df = df.rename(columns={item: oficial})
                         wanted_list.append(oficial)
     searchword, new_name = list(drybulb_rename['EXTERNAL'].keys())[0], drybulb_rename['EXTERNAL']['Environment']
     columns_list = df.columns
     for item in columns_list:
         if searchword in item:
-            df.rename(columns={item: new_name}, inplace=True)
+            df = df.rename(columns={item: new_name})
 
+    pbar.progress(19, "Building more utility objects...")
     dont_change_list = ['drybulb?temp_ext']
     for item in wanted_list:
         if item.endswith('loss') or item.endswith('gains') or item.endswith('gain') or item.endswith('cooling') or item.endswith('heating'):
@@ -204,10 +210,10 @@ def divide(df: pd.DataFrame, dont_change_list: list) -> pd.DataFrame:
         else:
             divided[f'{column}_gain'] = df[column].apply(lambda item: item if item>0 else 0)
             divided[f'{column}_loss'] = df[column].apply(lambda item: item if item<0 else 0)
-    divided.rename(columns=windows_and_frames, inplace=True)
+    divided = divided.rename(columns=windows_and_frames)
     divided = divided.groupby(level=0, axis=1).sum()
-    divided.reset_index(inplace=True)
-    divided.drop(columns='index', axis=1, inplace=True)
+    divided = divided.reset_index()
+    divided = divided.drop(columns='index', axis=1)
     divided = divided.sum().reset_index()
     divided.columns = ['gains_losses', 'value']
     return divided
@@ -228,19 +234,20 @@ def invert_values(dataframe: pd.DataFrame, way: str, multiply_list: list) -> pd.
     return df_copy
 
 
-def renamer_and_formater(df: pd.DataFrame, way: str, zones_dict: dict) -> pd.DataFrame:
+def renamer_and_formater(df: pd.DataFrame, way: str, zones_dict: dict, pbar: st.progress) -> pd.DataFrame:
     """
     Recebe o dataframe e uma lista de zonas, então manipula-o renomeando cada lista de 
     colunas e excluindo as colunas desnecessárias 
     """
     columns_list = df.columns
-    df, wanted_list, dont_change_list, multiply_list = rename_cols(columns_list=columns_list, df=df, way=way, dicionario=zones_dict)
+    df, wanted_list, dont_change_list, multiply_list = rename_cols(columns_list=columns_list, df=df, way=way, dicionario=zones_dict, pbar=pbar)
     columns_list = df.columns
     unwanted_list = []
+    pbar.progress(23, "Editing columns...")
     for item in columns_list:
         if item not in wanted_list:
             unwanted_list.append(item)
-    df.drop(columns=unwanted_list, axis=1, inplace=True)
+    df = df.drop(columns=unwanted_list, axis=1)
     return df, dont_change_list, multiply_list
 
 
@@ -256,7 +263,7 @@ def reorderer(df: pd.DataFrame) -> pd.DataFrame:
 
 def basic_manipulator(df: pd.DataFrame, dont_change_list: list) -> pd.DataFrame:
     """Faz o procedimento básico para todos os dataframes serem manipulados"""
-    df.drop(columns='Date/Time', axis=1, inplace=True)
+    df = df.drop(columns='Date/Time', axis=1)
     df = df.apply(sum_separated)
     df = divide(df, dont_change_list=dont_change_list)
     return df
@@ -290,7 +297,7 @@ def concatenator() -> pd.DataFrame:
     for item in glob_organizer:
         each_df = pd.read_csv(item, sep=',')
         df = pd.concat([df, each_df], axis=0, ignore_index=True)
-    df.drop(columns='Unnamed: 0', axis=1, inplace=True)
+    df = df.drop(columns='Unnamed: 0', axis=1)
     clear_cache()
     return df
 
@@ -349,7 +356,7 @@ def daily_manipulator(df: pd.DataFrame, days_list: list, name: str, way: str, zo
     for j in new_daily_df.index:
         date_splited = new_daily_df.at[j, 'Date/Time'].split(' ')[1]
         if date_splited not in days_list:
-            new_daily_df.drop(j, axis=0, inplace=True)
+            new_daily_df = new_daily_df.drop(j, axis=0)
     days = new_daily_df['Date/Time'].unique()
     for unique_datetime in days:
         df_daily = new_daily_df[new_daily_df['Date/Time'] == unique_datetime]
@@ -409,11 +416,11 @@ def hei_organizer(df: pd.DataFrame, way: str, zone) -> pd.DataFrame:
                 if WALL in superficie or FLOOR in superficie or ROOF in superficie:
                     mask = (df['zone'] == local) & (df['gains_losses'] == superficie)
                     df.loc[mask] = calculate_module_total_and_hei(df.loc[mask])
-    df.drop(['absolute'], axis=1, inplace=True)
+    df = df.drop(['absolute'], axis=1)
     return df
 
 
-def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_name: str, zone, coverage: str):
+def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_name: str, zone, coverage: str, pbar: st.progress):
     """
     Irá gerar os dataframes, separando por zona.
     input_dataframe: objeto dataframe
@@ -422,9 +429,10 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
     type_name: _convection_/_surface_
     zone: lista de zonas (SALA, DORM1, DORM2) ou string
     coverage: annual/monthly/daily
+    pbar: barra de progresso
     """
     input_dataframe = input_dataframe.dropna()
-    dicionario = read_db_and_build_dicts(selected_zones=zone, way=way)
+    dicionario = read_db_and_build_dicts(selected_zones=zone, way=way, pbar=pbar)
     if zone == 'All':
         zones_for_name = 'All-Zones'
     else:
@@ -432,22 +440,29 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
         for key in dicionario.keys():
             zones_for_name.append(key)
         zones_for_name = '-'.join(zones_for_name)
-    input_dataframe, dont_change_list, multiply_list = renamer_and_formater(df=input_dataframe, way=way, zones_dict=dicionario)
+    input_dataframe, dont_change_list, multiply_list = renamer_and_formater(df=input_dataframe, way=way, zones_dict=dicionario, pbar=pbar)
     # São agrupadas e somadas as colunas iguais
-    input_dataframe = input_dataframe.groupby(level=0, axis=1).sum()
-    input_dataframe.reset_index(inplace=True)
-    input_dataframe.drop(columns='index', axis=1, inplace=True)
+    pbar.progress(26, "Calculating the sum of equal columns...")
+    input_dataframe = input_dataframe.T.groupby(level=0).sum()
+    input_dataframe = input_dataframe.reset_index()
+    input_dataframe = input_dataframe.drop(columns='index', axis=1)
     input_dataframe = reorderer(df=input_dataframe)
+    pbar.progress(30, "Inverting the values of specific columns...")
     input_dataframe = invert_values(dataframe=input_dataframe, way=way, type_name=type_name, dataframe_name=filename, multiply_list=multiply_list, zones_for_name=zones_for_name)
     # Verifica o tipo de dataframe selecionado e cria-o
     match coverage:
         case 'annual':
+            pbar.progress(40, "Separating positives from negatives...")
             soma = basic_manipulator(df=input_dataframe, dont_change_list=dont_change_list)
             soma.loc[:, 'case'] = filename
             soma.loc[:, 'zone'] = 'no zone'
+            pbar.progress(50, "Separating zones...")
             soma = zone_breaker(df=soma)
+            pbar.progress(60, "Separating heat flux...")
             soma = way_breaker(df=soma)
+            pbar.progress(60, "Separating gains from losses...")
             soma = heat_direction_breaker(df=soma)
+            pbar.progress(90, "Calculating heat exchange index...")
             soma = hei_organizer(df=soma, way=way, zone=zone)
             soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',')
         case 'monthly':
@@ -458,7 +473,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             months = input_dataframe['month'].unique()
             for unique_month in months:
                 df_monthly = input_dataframe[input_dataframe['month'] == unique_month]
-                df_monthly.drop(columns='month', axis=1, inplace=True)
+                df_monthly = df_monthly.drop(columns='month', axis=1)
                 soma = basic_manipulator(df=df_monthly, dont_change_list=dont_change_list)
                 soma.loc[:, 'case'] = filename
                 soma.loc[:, 'month'] = unique_month
@@ -473,7 +488,6 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
         case 'daily':
             ## Max
             max_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmax()
-            max_value = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].max()
             date_str = input_dataframe.loc[max_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
@@ -481,7 +495,6 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             
             ## Min
             min_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmin()
-            min_value = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].min()
             date_str = input_dataframe.loc[min_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
