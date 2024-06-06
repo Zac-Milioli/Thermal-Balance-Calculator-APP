@@ -4,6 +4,8 @@ import sqlite3
 from glob import glob
 import os
 from st_pages import Page, Section, show_pages, add_page_title
+from datetime import datetime, timedelta
+import numpy as np
 
 def clear_cache():
     globed = glob(r"cache/*")
@@ -12,7 +14,7 @@ def clear_cache():
     open(r"cache/placeholder.txt", 'w').close()
 
 pages_route = r'pages/'
-assets_route = r'assets/'
+
 show_pages([
     Page(f'wiki.py', 'Wiki', '📖'),
     Section('Apps', icon='💻'),

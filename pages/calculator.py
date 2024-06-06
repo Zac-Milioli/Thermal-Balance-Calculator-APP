@@ -9,8 +9,8 @@ st.title("")
 sql_file = st.file_uploader("**Upload your SQL**", type="sql", accept_multiple_files=False,key='sql')
 
 with st.form("form_calculator", border=False):
-    worked = False
     notify_sql = st.container()
+    worked = False
     if sql_file:
         try:
             with st.spinner("Reading SQL..."):
