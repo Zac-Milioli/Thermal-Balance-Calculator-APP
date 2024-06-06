@@ -157,7 +157,6 @@ def rename_cols(columns_list: list, df: pd.DataFrame, way: str, dicionario: dict
     for item in columns_list:
         if searchword in item:
             df = df.rename(columns={item: new_name})
-
     pbar.progress(19, "Building more utility objects...")
     dont_change_list = ['drybulb?temp_ext']
     for item in wanted_list:
@@ -183,8 +182,6 @@ def sum_separated(coluna) -> pd.Series:
     """
     positivos = coluna[coluna >= 0].sum()
     negativos = coluna[coluna < 0].sum()
-    # negativos = negativos.sum()
-    # negativos = negativos * -1
     return pd.Series([positivos, negativos])
 
 
@@ -249,16 +246,6 @@ def renamer_and_formater(df: pd.DataFrame, way: str, zones_dict: dict, pbar: st.
             unwanted_list.append(item)
     df = df.drop(columns=unwanted_list, axis=1)
     return df, dont_change_list, multiply_list
-
-
-def reorderer(df: pd.DataFrame) -> pd.DataFrame:
-    """Reordena as colunas do dataframe para o Date/Time ser o primeiro item"""
-    reorder = ['Date/Time']
-    for item in df.columns:
-        if item != 'Date/Time':
-            reorder.append(item)
-    df = df[reorder]
-    return df
 
 
 def basic_manipulator(df: pd.DataFrame, dont_change_list: list) -> pd.DataFrame:
@@ -443,12 +430,12 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
     input_dataframe, dont_change_list, multiply_list = renamer_and_formater(df=input_dataframe, way=way, zones_dict=dicionario, pbar=pbar)
     # São agrupadas e somadas as colunas iguais
     pbar.progress(26, "Calculating the sum of equal columns...")
-    input_dataframe = input_dataframe.T.groupby(level=0).sum()
+    input_dataframe = input_dataframe.groupby(level=0).sum()
     input_dataframe = input_dataframe.reset_index()
+    pbar.progress(28, "Removing unused columns...")
     input_dataframe = input_dataframe.drop(columns='index', axis=1)
-    input_dataframe = reorderer(df=input_dataframe)
     pbar.progress(30, "Inverting the values of specific columns...")
-    input_dataframe = invert_values(dataframe=input_dataframe, way=way, type_name=type_name, dataframe_name=filename, multiply_list=multiply_list, zones_for_name=zones_for_name)
+    input_dataframe = invert_values(dataframe=input_dataframe, way=way, multiply_list=multiply_list)
     # Verifica o tipo de dataframe selecionado e cria-o
     match coverage:
         case 'annual':

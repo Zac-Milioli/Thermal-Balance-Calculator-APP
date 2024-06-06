@@ -43,5 +43,7 @@ with st.form("form_calculator", border=False, clear_on_submit=True):
                     df = pd.read_csv(globed[0])
                     st.dataframe(df)
                     progress_bar.empty()
-                except:
-                    notify_csv.error("An error occured while processing the CSV", icon='⚠️')
+                except Exception as e:
+                    # notify_csv.error("An error occured while processing the CSV", icon='⚠️')
+                    notify_csv.error(e, icon='⚠️')
+                    traceback.print_exc()
