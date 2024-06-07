@@ -452,7 +452,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(90, "Calculating heat exchange index...")
             soma = hei_organizer(df=soma, way=way, zone=zone)
             clear_cache()
-            soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',')
+            soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'monthly':
             input_dataframe.loc[:, 'month'] = 'no month'
             for row in input_dataframe.index:
@@ -473,21 +473,23 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
                 soma.to_csv(cache_path+'_month'+unique_month+'.csv', sep=',')
             df_total = concatenator()
             clear_cache()
-            df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',')
+            df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'daily':
             ## Max
             max_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmax()
             date_str = input_dataframe.loc[max_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
-            df_total.to_csv(output_path+'max_daily_'+zones_for_name+type_name+filename, sep=',')
+            clear_cache()
+            df_total.to_csv(output_path+'max_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             ## Min
             min_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmin()
             date_str = input_dataframe.loc[min_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
-            df_total.to_csv(output_path+'min_daily_'+zones_for_name+type_name+filename, sep=',')
+            clear_cache()
+            df_total.to_csv(output_path+'min_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
         
             ## Max and Min amp locator
             df_amp = input_dataframe.copy()
@@ -518,11 +520,11 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
             clear_cache()
-            df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',')
+            df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             # Min amp
             date_str = input_dataframe.loc[min_amp['index'], 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
             clear_cache()
-            df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',')
+            df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
