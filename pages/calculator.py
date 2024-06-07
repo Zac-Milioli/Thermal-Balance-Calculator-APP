@@ -33,8 +33,7 @@ with st.form("form_calculator", border=False, clear_on_submit=True):
             if not csv_file:
                 notify_csv.error("You **must** insert a CSV file to calculate", icon='⚠️')
             else:
-                progress_text = "Seting up files (deppending on the files size, this might take a while)"
-                progress_bar = st.progress(0, text=progress_text)
+                progress_bar = st.progress(0, text="Seting up files (deppending on the files size, this might take a while)")
                 use_zones = "All" if not zone_option else zone_option
                 try:
                     df = pd.read_csv(csv_file)
