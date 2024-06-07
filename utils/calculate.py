@@ -196,7 +196,7 @@ def divide(df: pd.DataFrame, dont_change_list: list) -> pd.DataFrame:
     for column in col:
         if column in dont_change_list:
             pass
-        elif "Window" in column or "GlassDoor" in column:
+        elif column in ["Window", "GlassDoor"]:
             azimuth_boundsurface = column.split("_")[-1]
             configs_name = column.replace(azimuth_boundsurface, "frame")
             windows_and_frames[f"{configs_name}_gain"] = f"{column}_gain"
@@ -430,7 +430,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
     input_dataframe, dont_change_list, multiply_list = renamer_and_formater(df=input_dataframe, way=way, zones_dict=dicionario, pbar=pbar)
     # São agrupadas e somadas as colunas iguais
     pbar.progress(26, "Calculating the sum of equal columns...")
-    input_dataframe = input_dataframe.groupby(level=0).sum()
+    input_dataframe = input_dataframe.groupby(level=0, axis=1).sum()
     input_dataframe = input_dataframe.reset_index()
     pbar.progress(28, "Removing unused columns...")
     input_dataframe = input_dataframe.drop(columns='index', axis=1)
@@ -451,6 +451,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             soma = heat_direction_breaker(df=soma)
             pbar.progress(90, "Calculating heat exchange index...")
             soma = hei_organizer(df=soma, way=way, zone=zone)
+            clear_cache()
             soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',')
         case 'monthly':
             input_dataframe.loc[:, 'month'] = 'no month'
@@ -471,6 +472,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
                 soma = hei_organizer(df=soma, way=way, zone=zone)
                 soma.to_csv(cache_path+'_month'+unique_month+'.csv', sep=',')
             df_total = concatenator()
+            clear_cache()
             df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',')
         case 'daily':
             ## Max
@@ -515,10 +517,12 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             date_str = input_dataframe.loc[max_amp['index'], 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
+            clear_cache()
             df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',')
             
             # Min amp
             date_str = input_dataframe.loc[min_amp['index'], 'Date/Time']
             days_list = days_finder(date_str=date_str)
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, dicionario=dicionario)
+            clear_cache()
             df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',')
