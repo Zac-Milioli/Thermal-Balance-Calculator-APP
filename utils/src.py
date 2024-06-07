@@ -14,6 +14,12 @@ def clear_cache():
         os.remove(i)
     open(r"cache/placeholder.txt", 'w').close()
 
+
+def clear_output():
+    globed = glob(r"output/*.csv")
+    for i in globed:
+        os.remove(i)
+
 pages_route = r'pages/'
 
 show_pages([
