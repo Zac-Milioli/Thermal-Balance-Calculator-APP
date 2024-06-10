@@ -336,19 +336,27 @@ def days_finder(date_str: str) -> list:
     return days_list
 
 
-def daily_manipulator(df: pd.DataFrame, days_list: list, name: str, way: str, zone: list, dont_change_list: list) -> pd.DataFrame:
+def daily_manipulator(df: pd.DataFrame, days_list: list, name: str, way: str, zone: list, dont_change_list: list, pbar: st.progress, legend: str) -> pd.DataFrame:
     """Manipula e gera os dataframes para cada datetime 
     dentro do período do evento"""
     new_daily_df = df.copy()
+    count_len_for_pbar = 1/len(new_daily_df.index)
+    pbar_state = 0.0
     for j in new_daily_df.index:
         date_splited = new_daily_df.at[j, 'Date/Time'].split(' ')[1]
+        pbar.progress(pbar_state, f"Processing date {date_splited} for {legend}")
         if date_splited not in days_list:
             new_daily_df = new_daily_df.drop(j, axis=0)
+        pbar_state += count_len_for_pbar
     days = new_daily_df['Date/Time'].unique()
+    count_len_for_pbar = 1/len(days)
+    pbar_state = 0.0
     for unique_datetime in days:
+        pbar.progress(pbar_state, f"Calculating heat exchange index for {unique_datetime}")
+        pbar_state += count_len_for_pbar
         df_daily = new_daily_df[new_daily_df['Date/Time'] == unique_datetime]
         soma = basic_manipulator(df=df_daily, dont_change_list=dont_change_list)
-        soma.loc[:, 'case'] = name.split('\\')[1]
+        soma.loc[:, 'case'] = name
         soma.loc[:, 'Date/Time'] = unique_datetime
         soma.loc[:, 'zone'] = 'no zone'
         soma = zone_breaker(df=soma)
@@ -479,22 +487,27 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'daily':
             ## Max
+            pbar.progress(40, "Searching for day with maximum value...")
             max_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmax()
             date_str = input_dataframe.loc[max_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
-            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list)
+            pbar.progress(47, "Maximum value found...")
+            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with maximum value")
             clear_cache()
             df_total.to_csv(output_path+'max_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             ## Min
+            pbar.progress(54, "Searching for day with minimum value...")
             min_temp_idx = input_dataframe[drybulb_rename['EXTERNAL']['Environment']].idxmin()
             date_str = input_dataframe.loc[min_temp_idx, 'Date/Time']
             days_list = days_finder(date_str=date_str)
-            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list)
+            pbar.progress(61, "Minimum value found...")
+            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with minimum value")
             clear_cache()
             df_total.to_csv(output_path+'min_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
         
             ## Max and Min amp locator
+            pbar.progress(68, "Searching for day with maximum and minimum amplitudes...")
             df_amp = input_dataframe.copy()
             df_amp.loc[:, 'date'] = 'no date'
             for row in df_amp.index:
@@ -517,17 +530,21 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
                     min_amp['date'] = days
                     min_amp['value'] = total
                     min_amp['index'] = idx_daily
+            pbar.progress(75, "Days found...")
 
             # Max amp
             date_str = input_dataframe.loc[max_amp['index'], 'Date/Time']
             days_list = days_finder(date_str=date_str)
-            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list)
+            pbar.progress(82, "Maximum amplitude found...")
+            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with maximum amplitude")
             clear_cache()
             df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             # Min amp
             date_str = input_dataframe.loc[min_amp['index'], 'Date/Time']
             days_list = days_finder(date_str=date_str)
-            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list)
+            pbar.progress(90, "Minimum amplitude found...")
+            df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with minimum amplitude")
             clear_cache()
             df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
+            pbar.progress(95, "Finishing...")

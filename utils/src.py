@@ -7,6 +7,8 @@ from st_pages import Page, Section, show_pages, add_page_title
 from datetime import datetime, timedelta
 import numpy as np
 import traceback
+import warnings
+warnings.filterwarnings('ignore')
 
 def clear_cache():
     globed = glob(r"cache/*")
