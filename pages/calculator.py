@@ -61,4 +61,4 @@ with st.form("form_calculator", border=False, clear_on_submit=True):
                         col2.dataframe(df4, height=250)
                     progress_bar.empty()
                 except Exception as e:
-                    notify_csv.error(f"An error occured while processing the CSV\n({e})", icon='⚠️')
+                    notify_csv.error(f"An error occured while processing the CSV ({e})", icon='⚠️')

@@ -340,14 +340,18 @@ def daily_manipulator(df: pd.DataFrame, days_list: list, name: str, way: str, zo
     """Manipula e gera os dataframes para cada datetime 
     dentro do período do evento"""
     new_daily_df = df.copy()
-    count_len_for_pbar = 1/len(new_daily_df.index)
-    pbar_state = 0.0
-    for j in new_daily_df.index:
-        date_splited = new_daily_df.at[j, 'Date/Time'].split(' ')[1]
-        pbar.progress(pbar_state, f"Processing date {date_splited} for {legend}")
-        if date_splited not in days_list:
-            new_daily_df = new_daily_df.drop(j, axis=0)
-        pbar_state += count_len_for_pbar
+    # MÉTODO ANTIGO
+    # count_len_for_pbar = 1/len(new_daily_df.index)
+    # pbar_state = 0.0
+    # for j in new_daily_df.index:
+    #     date_splited = new_daily_df.at[j, 'Date/Time'].split(' ')[1]
+    #     # pbar.progress(pbar_state, f"Processing date {date_splited} for {legend}")
+    #     if date_splited not in days_list:
+    #         new_daily_df = new_daily_df.drop(j, axis=0)
+    #     # pbar_state += count_len_for_pbar
+    pbar.progress(50, "Separating the correct timestamp...")
+    mask = new_daily_df['Date/Time'].str.split(' ').str.get(1).isin(days_list)
+    new_daily_df = new_daily_df[mask]
     days = new_daily_df['Date/Time'].unique()
     count_len_for_pbar = 1/len(days)
     pbar_state = 0.0
