@@ -1,6 +1,7 @@
 from utils.src import *
 
 clear_cache()
+clear_output()
 st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
 add_page_title()
 
