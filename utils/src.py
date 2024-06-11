@@ -7,6 +7,9 @@ from st_pages import Page, Section, show_pages, add_page_title
 from datetime import datetime, timedelta
 import numpy as np
 import traceback
+import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -19,6 +22,9 @@ def clear_cache():
 
 def clear_output():
     globed = glob(r"output/*.csv")
+    for i in globed:
+        os.remove(i)
+    globed = glob(r"output/*.png")
     for i in globed:
         os.remove(i)
 
