@@ -24,10 +24,10 @@ class HeatMap:
         match self.zones:
             case 0:
                 self.df = self.df.loc[self.df['zone'] != 'EXTERNAL']
-                self.title = f'Total HeatMap of {self.target_type}'
+                self.title = f'Total HeatMap of {self.target_type} from {filename}'
             case _:
                 self.df = self.df.loc[self.df['zone'].isin(self.zones)]    
-                self.title = f'HeatMap of {self.target_type} for zones {", ".join(self.zones)}'
+                self.title = f'HeatMap of {self.target_type} for zones {", ".join(self.zones)} from {filename}'
         match self.months:
             case 0:
                 pass

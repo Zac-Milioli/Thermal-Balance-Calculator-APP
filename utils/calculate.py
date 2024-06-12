@@ -138,6 +138,7 @@ def read_db_and_build_dicts(selected_zones, way: str, pbar: st.progress) -> dict
                                 dicionario[zone]['surface'][f'{surf_name}:{surface_specific}'] = f'{surf_transf}?none_{surf_bound}{surf_type}'
                             else:
                                 dicionario[zone]['surface'][f'{surf_name}:{surface_specific}'] = f'{surf_transf}?{surf_azimuth}_{surf_bound}{surf_type}'
+    clear_cache()
     return dicionario
 
 

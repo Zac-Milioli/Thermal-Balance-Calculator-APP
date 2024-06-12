@@ -2,8 +2,13 @@ from utils.plot import *
 st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
 
 clear_cache()
-clear_output()
+clear_output_csv()
 add_page_title()
+
+col1, col2, col3 = st.columns(3)
+if col2.button(label="Clear gallery", use_container_width=True):
+    clear_output()
+st.title("")
 
 csv_file = st.file_uploader(label="Upload your result CSV", type="csv", accept_multiple_files=False)
 
@@ -35,10 +40,12 @@ if csv_file:
             months_selected = st.multiselect(label="Months", options=months_on_df, placeholder="All year")
         
         st.title("")
-        if st.form_submit_button(label='Create HeatMap'):
+        col1, col2, col3 = st.columns(3)
+        if col2.form_submit_button(label='Create Heatmap', use_container_width=True):
             zones_opt = 0 if not zones_multiselect else zones_multiselect
             months_opt = 0 if not months_selected else months_selected
             filename = csv_file.name.replace(".csv", "")
+            filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
             notify_heatmap = st.container()
             try:
                 new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename)
@@ -46,8 +53,32 @@ if csv_file:
                     new_heatmap.annual()
                 elif range_opt == 'monthly':
                     new_heatmap.monthly()
-                
-                globed = glob("output/*.png")
-                st.image(image=globed[0])
             except Exception as e:
-                notify_heatmap.error(e, icon='⚠️')
+                notify_heatmap.error(f'The following error occured while processing the files: {e}', icon='⚠️')
+
+
+globed = glob("output/*.png")
+if len(globed) != 0:
+    with zipfile.ZipFile(r'cache/outputs.zip', 'w') as meu_zip:
+        for csv_file in globed:
+            meu_zip.write(csv_file, arcname=csv_file)
+    col1, col2, col3 = st.columns(3)
+    with open(r'cache/outputs.zip', 'rb') as f:
+        bytes = f.read()
+        col2.download_button(
+            label="Download Heatmaps",
+            data=bytes,
+            file_name='outputs.zip',
+            mime='application/zip',
+            use_container_width=True
+        )
+
+if len(globed) != 0:
+    st.title("")
+    st.caption("Heatmaps Gallery:")
+    with st.container(border=True):
+        globed = list(reversed(globed))
+        ncols = min(2, len(globed))
+        cols = st.columns(ncols)
+        for i, img in enumerate(globed):
+            cols[i % ncols].image(img)

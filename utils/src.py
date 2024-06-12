@@ -15,10 +15,12 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def clear_cache():
-    globed = glob(r"cache/*")
+    globed = glob(r"cache/*.csv")
     for i in globed:
         os.remove(i)
-    open(r"cache/placeholder.txt", 'w').close()
+    globed = glob(r"cache/*.png")
+    for i in globed:
+        os.remove(i)
 
 
 def clear_output():
@@ -28,6 +30,13 @@ def clear_output():
     globed = glob(r"output/*.png")
     for i in globed:
         os.remove(i)
+
+
+def clear_output_csv():
+    globed = glob(r"output/*.csv")
+    for i in globed:
+        os.remove(i)
+
 
 pages_route = r'pages/'
 
