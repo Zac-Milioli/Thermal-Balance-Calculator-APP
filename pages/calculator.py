@@ -10,6 +10,7 @@ st.title("")
 sql_file = st.file_uploader("**Upload your SQL**", type="sql", accept_multiple_files=False,key='sql')
 
 with st.form("form_calculator", border=False, clear_on_submit=True):
+    st.session_state['form_filled'] = False
     notify_sql = st.container()
     worked = False
     if sql_file:
@@ -41,24 +42,39 @@ with st.form("form_calculator", border=False, clear_on_submit=True):
                     progress_bar.progress(100, "Done")
                     globed = glob(f"{output_path}*.csv")
                     st.title('')
-                    if len(globed) == 1:    
-                        df = pd.read_csv(globed[0])
-                        st.caption(globed[0].split('\\')[-1])
-                        st.dataframe(df)
-                    else:
-                        df1 = pd.read_csv(globed[0])
-                        df2 = pd.read_csv(globed[1])
-                        df3 = pd.read_csv(globed[2])
-                        df4 = pd.read_csv(globed[3])
-                        col1, col2 = st.columns(2)
-                        col1.caption(globed[0].split('\\')[-1])
-                        col1.dataframe(df1, height=250)
-                        col2.caption(globed[1].split('\\')[-1])
-                        col2.dataframe(df2, height=250)
-                        col1.caption(globed[2].split('\\')[-1])
-                        col1.dataframe(df3, height=250)
-                        col2.caption(globed[3].split('\\')[-1])
-                        col2.dataframe(df4, height=250)
+                    # if len(globed) == 1:    
+                    #     df = pd.read_csv(globed[0])
+                    #     st.caption(globed[0].split('\\')[-1])
+                    #     st.dataframe(df)
+                    # else:
+                    #     df1 = pd.read_csv(globed[0])
+                    #     df2 = pd.read_csv(globed[1])
+                    #     df3 = pd.read_csv(globed[2])
+                    #     df4 = pd.read_csv(globed[3])
+                    #     col1, col2 = st.columns(2)
+                    #     col1.caption(globed[0].split('\\')[-1])
+                    #     col1.dataframe(df1, height=250)
+                    #     col2.caption(globed[1].split('\\')[-1])
+                    #     col2.dataframe(df2, height=250)
+                    #     col1.caption(globed[2].split('\\')[-1])
+                    #     col1.dataframe(df3, height=250)
+                    #     col2.caption(globed[3].split('\\')[-1])
+                    #     col2.dataframe(df4, height=250)
                     progress_bar.empty()
+                    st.session_state['form_filled'] = True
                 except Exception as e:
                     notify_csv.error(f"An error occured while processing the CSV ({e})", icon='⚠️')
+
+if st.session_state['form_filled']:
+    with zipfile.ZipFile(r'cache/outputs.zip', 'w') as meu_zip:
+        for csv_file in globed:
+            meu_zip.write(csv_file, arcname=csv_file)
+
+    with open(r'cache/outputs.zip', 'rb') as f:
+        bytes = f.read()
+        st.download_button(
+            label="Download outputs",
+            data=bytes,
+            file_name='outputs.zip',
+            mime='application/zip'
+        )

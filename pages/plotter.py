@@ -28,7 +28,8 @@ if csv_file:
 
         use_tight = col1.checkbox(label="Tight layout")
         cbar_loc = col2.radio(label="Color bar location", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
-        
+        months_selected = False
+
         if range_opt == 'monthly':
             months_on_df = dataframe['month'].unique()
             months_selected = st.multiselect(label="Months", options=months_on_df, placeholder="All year")
