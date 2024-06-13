@@ -25,7 +25,7 @@ with st.form("form_calculator", border=False, clear_on_submit=True):
         col1, col2, col3 = st.columns(3)
         zone_option = col1.multiselect(label="Pick the zones", options=zones_list, placeholder="All Zones")
         type_option = col2.selectbox(label="Select the type", options=['convection', 'surface'], index=0, placeholder='convection')
-        coverage_option = col3.selectbox(label="Choose a coverage", options=['annual', 'monthly', 'daily'], index=0, placeholder='annual')
+        coverage_option = col3.selectbox(label="Choose a timestep", options=['annual', 'monthly', 'daily'], index=0, placeholder='annual')
         csv_file = st.file_uploader("**Upload your CSV**", type="csv", accept_multiple_files=False,key='csv')
         notify_csv = st.container()
         st.title("")
@@ -68,4 +68,5 @@ if len(globed) != 0:
         ncols = min(2, len(globed))
         cols = st.columns(ncols)
         for i, df in enumerate(globed):
+            st.caption(df)
             cols[i % ncols].dataframe(pd.read_csv(df))
