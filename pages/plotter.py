@@ -1,4 +1,6 @@
 from utils.plot import *
+
+st.sidebar.write('')
 st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
 st.sidebar.divider()
 st.sidebar.image(r"utils/lab_banner.png", width=300)
