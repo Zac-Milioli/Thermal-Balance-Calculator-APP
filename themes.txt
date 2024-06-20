@@ -1,0 +1,17 @@
+labeee
+
+[theme]
+base="light"
+primaryColor="#a9d18e"
+secondaryBackgroundColor="#f5f5f5"
+textColor="#000000"
+font="serif"
+
+padrão
+
+[theme]
+primaryColor="#737373"
+backgroundColor="#505050"
+secondaryBackgroundColor="#000000"
+textColor="#ffffff"
+font="serif"
