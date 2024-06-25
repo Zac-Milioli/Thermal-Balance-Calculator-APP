@@ -3,4 +3,4 @@ __pycache__
 *.sql
 *.csv
 *.zip
-*.png
+output/*.png
