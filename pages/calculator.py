@@ -6,7 +6,7 @@ st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
 st.sidebar.divider()
 st.sidebar.image(r"utils/lab_banner.png", width=300)
 st.sidebar.subheader("")
-add_page_title()
+add_page_title(layout='wide')
 
 st.warning("NOTICE: It is essential that the user reads the **manual** or **Wiki** before using this website, as **file formats and naming should be exactly as the manual says**", icon="💡")
 st.title("")

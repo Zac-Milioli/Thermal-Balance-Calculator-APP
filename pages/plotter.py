@@ -7,7 +7,7 @@ st.sidebar.image(r"utils/lab_banner.png", width=300)
 
 clear_cache()
 clear_output_csv()
-add_page_title()
+add_page_title(layout='wide')
 
 col1, col2, col3 = st.columns(3)
 if col2.button(label="Clear gallery", use_container_width=True):
