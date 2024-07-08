@@ -11,10 +11,11 @@ surfaces_rename = {
 }
 
 class HeatMap:
-    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, sizefont: float = 10, tight: bool = False):
+    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, sizefont: float = 10, tight: bool = False):
         self.df = df
         self.target_type = target_type
         self.filename = filename
+        self.values = values
         self.df['gains_losses'] = self.df['gains_losses'].apply(lambda name: name.replace("_", " ").title())
         self.df['gains_losses'] = self.df.apply(lambda row: f'{row["gains_losses"]} +' if row['heat_direction'] == 'gain' else f'{row["gains_losses"]} -', axis=1)
         self.zones = zones
@@ -95,14 +96,14 @@ class HeatMap:
         self.df = pd.concat([df_plus, df_mins], axis=0)
 
     def annual(self) -> sns.heatmap:
-        self.df = self.df[['gains_losses', 'zone', 'HEI']].pivot_table(index='gains_losses', columns='zone', values='HEI').fillna(0)
+        self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
         self.order_sign()
         self.plot_heatmap()
         
 
     def monthly(self) -> sns.heatmap:
         self.df['zone'] = self.df.apply(lambda row: f'{row["zone"]}?{row["month"]}', axis=1)
-        self.df = self.df[['gains_losses', 'zone', 'HEI']].pivot_table(index='gains_losses', columns='zone', values='HEI').fillna(0)
+        self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
         self.df = self.df[sorted(self.df.columns, key=self.month_number)]
         self.order_sign()
         self.df.columns = [f'{column.split("?")[0]}?{column.split("?")[1].replace(column.split("?")[1], num_to_month[int(column.split("?")[1])])}' for column in self.df.columns]

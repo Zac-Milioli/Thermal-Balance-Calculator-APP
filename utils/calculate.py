@@ -416,7 +416,6 @@ def hei_organizer(df: pd.DataFrame, way: str, zone) -> pd.DataFrame:
                 if WALL in superficie or FLOOR in superficie or ROOF in superficie:
                     mask = (df['zone'] == local) & (df['gains_losses'] == superficie)
                     df.loc[mask] = calculate_module_total_and_hei(df.loc[mask])
-    df = df.drop(['absolute'], axis=1)
     return df
 
 
