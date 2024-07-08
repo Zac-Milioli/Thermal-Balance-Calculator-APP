@@ -16,6 +16,12 @@ class HeatMap:
         self.target_type = target_type
         self.filename = filename
         self.values = values
+        if self.values == 'HEI':
+            self.max_val = 1
+            self.min_val = 0
+        else:
+            self.max_val = None
+            self.min_val = None
         self.df['gains_losses'] = self.df['gains_losses'].apply(lambda name: name.replace("_", " ").title())
         self.df['gains_losses'] = self.df.apply(lambda row: f'{row["gains_losses"]} +' if row['heat_direction'] == 'gain' else f'{row["gains_losses"]} -', axis=1)
         self.zones = zones
@@ -47,7 +53,7 @@ class HeatMap:
         plt.figure(figsize=(16, 9))
         colors = ["#FFFFFF", "#496DDB", "#00CC66", "#FFFF00", "#F98016", "#F2002B"] if self.target_type == 'convection' else ["#FFFFFF","#A8DADC","#1D3557","#FFBA49","#EC9A9A","#D13440"]
         cmap = LinearSegmentedColormap.from_list('Custom_cmap', colors)
-        heatmap = sns.heatmap(data=self.df, vmax=1, vmin=0, cmap=cmap, linewidths=1, xticklabels=True, yticklabels=True, cbar_kws = self.cbar_kws)
+        heatmap = sns.heatmap(data=self.df, vmax=self.max_val, vmin=self.min_val, cmap=cmap, linewidths=1, xticklabels=True, yticklabels=True, cbar_kws = self.cbar_kws)
         heatmap.set_xlabel('')
         heatmap.set_ylabel('Heat Exchanges')
         heatmap.set_title(self.title)

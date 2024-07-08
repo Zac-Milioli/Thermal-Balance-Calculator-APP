@@ -34,7 +34,8 @@ if csv_file:
             zones_multiselect = st.multiselect(label="Zones", options=zones_in_df, placeholder="All Zones")
             col1, col2 = st.columns(2)
             type_opt = col1.selectbox(label="Type", options=["convection", "surface"], index=0, placeholder="convection")
-            use = col2.selectbox(label="Use", options=["HEI", "absolute", "value"], index=0, placeholder="HEI")
+            vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value"}
+            use = col2.selectbox(label="Plot", options=list(vals.keys()), index=0)
             
             col1, col2 = st.columns(2)
 
@@ -55,7 +56,7 @@ if csv_file:
                 filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                 notify_heatmap = st.container()
                 try:
-                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=use)
+                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use])
                     if range_opt == 'annual':
                         new_heatmap.annual()
                     elif range_opt == 'monthly':
