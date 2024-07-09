@@ -11,10 +11,12 @@ surfaces_rename = {
 }
 
 class HeatMap:
-    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, sizefont: float = 10, tight: bool = False):
+    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, annotate: bool, sizefont: float = 10, tight: bool = False):
         self.df = df
         self.target_type = target_type
         self.filename = filename
+        self.annotate = annotate
+        self.fmt = '.3f' if self.annotate else '.2g'
         self.values = values
         if self.values == 'HEI':
             self.max_val = 1
@@ -53,7 +55,7 @@ class HeatMap:
         plt.figure(figsize=(16, 9))
         colors = ["#FFFFFF", "#496DDB", "#00CC66", "#FFFF00", "#F98016", "#F2002B"] if self.target_type == 'convection' else ["#FFFFFF","#A8DADC","#1D3557","#FFBA49","#EC9A9A","#D13440"]
         cmap = LinearSegmentedColormap.from_list('Custom_cmap', colors)
-        heatmap = sns.heatmap(data=self.df, vmax=self.max_val, vmin=self.min_val, cmap=cmap, linewidths=1, xticklabels=True, yticklabels=True, cbar_kws = self.cbar_kws)
+        heatmap = sns.heatmap(data=self.df, vmax=self.max_val, annot=self.annotate, fmt=self.fmt, vmin=self.min_val, cmap=cmap, linewidths=1, xticklabels=True, yticklabels=True, cbar_kws = self.cbar_kws)
         heatmap.set_xlabel('')
         heatmap.set_ylabel('Heat Exchanges')
         heatmap.set_title(self.title)

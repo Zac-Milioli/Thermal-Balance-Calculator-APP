@@ -39,10 +39,11 @@ if csv_file:
             
             col1, col2 = st.columns(2)
 
-            use_tight = col1.checkbox(label="Tight layout")
+            use_tight = col1.checkbox(label="Tight layout (squish the plot as much as possible, may overlap information)")
+            annot_vals = col1.checkbox(label="Show cells values (not recommended for bigger plots as information may overlap)")
             cbar_loc = col2.radio(label="Color bar location", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
-            months_selected = False
 
+            months_selected = False
             if range_opt == 'monthly':
                 months_on_df = dataframe['month'].unique()
                 months_selected = st.multiselect(label="Months", options=months_on_df, placeholder="All year")
@@ -56,7 +57,7 @@ if csv_file:
                 filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                 notify_heatmap = st.container()
                 try:
-                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use])
+                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals)
                     if range_opt == 'annual':
                         new_heatmap.annual()
                     elif range_opt == 'monthly':
