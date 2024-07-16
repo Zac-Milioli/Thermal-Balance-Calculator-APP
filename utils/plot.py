@@ -11,12 +11,12 @@ surfaces_rename = {
 }
 
 class HeatMap:
-    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, annotate: bool, sizefont: float = 10, tight: bool = False):
+    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
         self.df = df
         self.target_type = target_type
         self.filename = filename
         self.annotate = annotate
-        self.fmt = '.3f' if self.annotate else '.2g'
+        self.fmt = f'.{fmt}f'
         self.values = values
         if self.values == 'HEI':
             self.max_val = 1

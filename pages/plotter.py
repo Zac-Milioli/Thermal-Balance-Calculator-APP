@@ -36,12 +36,10 @@ if csv_file:
             type_opt = col1.selectbox(label="Tipo", options=["convection", "surface"], index=0, placeholder="convection")
             vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value"}
             use = col2.selectbox(label="Plotar", options=list(vals.keys()), index=0)
+            format_use = col2.number_input(label='Insira o número de casas após a vírgula desejados (Escolha -1 caso deseje não exibir os valores)', step=1, value=-1, min_value=-1, max_value=10)
             
-            col1, col2 = st.columns(2)
-
+            cbar_loc = col1.radio(label="Localização da barra de cores", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
             use_tight = col1.checkbox(label="Tight layout (Espremer o gráfico para telas menores, pode haver sobreposição)")
-            annot_vals = col1.checkbox(label="Exibir valores nas células (Com muitas informações, pode haver sobreposição)")
-            cbar_loc = col2.radio(label="Localização da barra de cores", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
 
             months_selected = False
             if range_opt == 'monthly':
@@ -51,13 +49,15 @@ if csv_file:
             st.title("")
             col1, col2, col3 = st.columns(3)
             if col2.form_submit_button(label='Criar Heatmap', use_container_width=True):
+                annot_vals = True if format_use != -1 else False
+                format_use = 2 if format_use == -1 else format_use 
                 zones_opt = 0 if not zones_multiselect else zones_multiselect
                 months_opt = 0 if not months_selected else months_selected
                 filename = csv_file.name.replace(".csv", "")
                 filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                 notify_heatmap = st.container()
                 try:
-                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals)
+                    new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals, fmt=format_use)
                     if range_opt == 'annual':
                         new_heatmap.annual()
                     elif range_opt == 'monthly':
