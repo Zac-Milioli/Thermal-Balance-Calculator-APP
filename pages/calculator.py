@@ -2,51 +2,51 @@ from utils.calculate import *
 
 clear_output_csv()
 st.sidebar.write('')
-st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
+st.sidebar.header("**CALCULADORA DE BALANÇO TÉRMICO**")
 st.sidebar.divider()
 st.sidebar.image(r"utils/lab_banner.png", width=300)
 st.sidebar.subheader("")
 add_page_title(layout='wide')
 
-st.warning("NOTICE: It is essential that the user reads the **manual** or **Wiki** before using this website, as **file formats and naming should be exactly as the manual says**", icon="💡")
+st.warning("ATENÇÃO: É essencial que o usuário leia o **manual** e a **Wiki** antes de utilizar os Apps, pois a formatação dos arquivos deve seguir a documentação para funcionar", icon="💡")
 st.title("")
 
-sql_file = st.file_uploader("**Upload your SQL**", type="sql", accept_multiple_files=False,key='sql')
+sql_file = st.file_uploader("**Faça upload do seu arquivo SQL**", type="sql", accept_multiple_files=False,key='sql')
 
 with st.form("form_calculator", border=False, clear_on_submit=True):
     notify_sql = st.container()
     worked = False
     if sql_file:
         try:
-            with st.spinner("Reading SQL..."):
+            with st.spinner("Lendo SQL..."):
                 zones_list = read_db_for_zones(connection=save_and_connect_sql(sql_file))
                 worked = True
         except:
-            notify_sql.error("An error occured while processing the SQL", icon='⚠️')
+            notify_sql.error("Um erro ocorreu ao processar o arquivo SQL", icon='⚠️')
             st.stop()
         
     if worked:
         col1, col2, col3 = st.columns(3)
-        zone_option = col1.multiselect(label="Pick the zones", options=zones_list, placeholder="All Zones")
-        type_option = col2.selectbox(label="Select the type", options=['convection', 'surface'], index=0, placeholder='convection')
-        coverage_option = col3.selectbox(label="Choose a timestep", options=['annual', 'monthly', 'daily'], index=0, placeholder='annual')
-        csv_file = st.file_uploader("**Upload your CSV**", type="csv", accept_multiple_files=False,key='csv')
+        zone_option = col1.multiselect(label="Selecione as zonas", options=zones_list, placeholder="All Zones")
+        type_option = col2.selectbox(label="Selecione o tipo", options=['convection', 'surface'], index=0, placeholder='convection')
+        coverage_option = col3.selectbox(label="Selecione um período", options=['annual', 'monthly', 'daily'], index=0, placeholder='annual')
+        csv_file = st.file_uploader("**Faça upload do seu CSV**", type="csv", accept_multiple_files=False,key='csv')
         notify_csv = st.container()
         st.title("")
         col1, col2, col3 = st.columns(3)
-        if col2.form_submit_button("Calculate", use_container_width=True):
+        if col2.form_submit_button("Calcular", use_container_width=True):
             if not csv_file:
-                notify_csv.error("You **must** insert a CSV file to calculate", icon='⚠️')
+                notify_csv.error("Você **deve** inserir um CSV para calcular", icon='⚠️')
             else:
-                progress_bar = st.progress(0, text="Seting up files (deppending on the files size, this might take a while)")
+                progress_bar = st.progress(0, text="Preparando arquivos (Dependendo do tamanho dos arquivos, isso pode levar algum tempo)")
                 use_zones = "All" if not zone_option else zone_option
                 try:
                     df = pd.read_csv(csv_file)
                     generate_df(input_dataframe=df, filename=csv_file.name, way=type_option, type_name=f"_{type_option}_", coverage=coverage_option, zone=use_zones, pbar=progress_bar)
-                    progress_bar.progress(100, "Done")
+                    progress_bar.progress(100, "Feito")
                     progress_bar.empty()
-                except Exception as e:
-                    notify_csv.error(f"The following error occured while processing the CSV: {e}", icon='⚠️')
+                except:
+                    notify_csv.error(f"Um erro ocorreu ao processar o CSV", icon='⚠️')
 
 globed = glob(f"{output_path}*.csv")
 if len(globed) != 0:
@@ -58,7 +58,7 @@ if len(globed) != 0:
     with open(r'cache/outputs.zip', 'rb') as f:
         bytes = f.read()
         col2.download_button(
-            label="Download Dataframes",
+            label="Baixar planilhas",
             data=bytes,
             file_name='outputs.zip',
             mime='application/zip',
@@ -67,10 +67,10 @@ if len(globed) != 0:
 
 if len(globed) != 0:
     st.title("")
-    st.caption("Dataframes Gallery:")
+    st.caption("Galeria de planilhas:")
     with st.container(border=True):
         ncols = min(2, len(globed))
         cols = st.columns(ncols)
         for i, df in enumerate(globed):
-            st.caption(df)
-            cols[i % ncols].dataframe(pd.read_csv(df))
+            cols[i % ncols].caption(df)
+            cols[i % ncols].dataframe(pd.read_csv(df), use_container_width=True)

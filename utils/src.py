@@ -43,6 +43,6 @@ pages_route = r'pages/'
 show_pages([
     Page(f'wiki.py', 'Wiki', '📖'),
     Section('Apps', icon='💻'),
-    Page(f'{pages_route}calculator.py', 'Calculator', '🧮', in_section=True),
-    Page(f'{pages_route}plotter.py', 'Plotter', '📊', in_section=True)
+    Page(f'{pages_route}calculator.py', 'Calculadora', '🧮', in_section=True),
+    Page(f'{pages_route}plotter.py', 'Plotar Dados', '📊', in_section=True)
 ])

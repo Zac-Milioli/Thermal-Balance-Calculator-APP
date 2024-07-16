@@ -1,7 +1,7 @@
 from utils.plot import *
 
 st.sidebar.write('')
-st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
+st.sidebar.header("**CALCULADORA DE BALANÇO TÉRMICO**")
 st.sidebar.divider()
 st.sidebar.image(r"utils/lab_banner.png", width=300)
 
@@ -10,11 +10,11 @@ clear_output_csv()
 add_page_title(layout='wide')
 
 col1, col2, col3 = st.columns(3)
-if col2.button(label="Clear gallery", use_container_width=True):
+if col2.button(label="Limpar galeria", use_container_width=True):
     clear_output()
 st.title("")
 
-csv_file = st.file_uploader(label="Upload your result CSV", type="csv", accept_multiple_files=False)
+csv_file = st.file_uploader(label="Faça upload do seu CSV de resultados", type="csv", accept_multiple_files=False)
 
 notify_file = st.container()
 
@@ -24,33 +24,33 @@ if csv_file:
     try:
         dataframe = pd.read_csv(csv_file)
     except:
-        notify_file.error("An error occured while reading the CSV file. Check your file format, name and content and try again", icon='⚠️')
+        notify_file.error("Um erro ocorreu ao ler o CSV inserido. Verifique o formato do seu arquivo, nome e conteúdo e tente novamente", icon='⚠️')
 
-    range_opt = st.selectbox(label="Coverage", options=["annual", "monthly"], index=0, placeholder="annual")
+    range_opt = st.selectbox(label="Período", options=["annual", "monthly"], index=0, placeholder="annual")
 
     try:    
         with st.form("form_plotter", border=False):
             zones_in_df = dataframe["zone"].unique()
-            zones_multiselect = st.multiselect(label="Zones", options=zones_in_df, placeholder="All Zones")
+            zones_multiselect = st.multiselect(label="Zonas", options=zones_in_df, placeholder="All Zones")
             col1, col2 = st.columns(2)
-            type_opt = col1.selectbox(label="Type", options=["convection", "surface"], index=0, placeholder="convection")
+            type_opt = col1.selectbox(label="Tipo", options=["convection", "surface"], index=0, placeholder="convection")
             vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value"}
-            use = col2.selectbox(label="Plot", options=list(vals.keys()), index=0)
+            use = col2.selectbox(label="Plotar", options=list(vals.keys()), index=0)
             
             col1, col2 = st.columns(2)
 
-            use_tight = col1.checkbox(label="Tight layout (squish the plot as much as possible, may overlap information)")
-            annot_vals = col1.checkbox(label="Show cells values (not recommended for bigger plots as information may overlap)")
-            cbar_loc = col2.radio(label="Color bar location", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
+            use_tight = col1.checkbox(label="Tight layout (Espremer o gráfico para telas menores, pode haver sobreposição)")
+            annot_vals = col1.checkbox(label="Exibir valores nas células (Com muitas informações, pode haver sobreposição)")
+            cbar_loc = col2.radio(label="Localização da barra de cores", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
 
             months_selected = False
             if range_opt == 'monthly':
                 months_on_df = dataframe['month'].unique()
-                months_selected = st.multiselect(label="Months", options=months_on_df, placeholder="All year")
+                months_selected = st.multiselect(label="Meses", options=months_on_df, placeholder="All year")
             
             st.title("")
             col1, col2, col3 = st.columns(3)
-            if col2.form_submit_button(label='Create Heatmap', use_container_width=True):
+            if col2.form_submit_button(label='Criar Heatmap', use_container_width=True):
                 zones_opt = 0 if not zones_multiselect else zones_multiselect
                 months_opt = 0 if not months_selected else months_selected
                 filename = csv_file.name.replace(".csv", "")
@@ -62,10 +62,10 @@ if csv_file:
                         new_heatmap.annual()
                     elif range_opt == 'monthly':
                         new_heatmap.monthly()
-                except Exception as e:
-                    notify_heatmap.error(f'The following error occured while processing the files: {e}', icon='⚠️')
-    except Exception as e:
-        notify_file.error(f'ERROR: No month column detected in dataframe. Change the Coverage to match your dataframe type.', icon='⚠️')
+                except:
+                    notify_heatmap.error(f'Um erro ocorreu ao gerar o Heatmap.', icon='⚠️')
+    except:
+        notify_file.error(f'ERRO: Coluna de meses não encontrada na planilha. Altere o período para se igualar à sua planilha.', icon='⚠️')
 
 globed = glob("output/*.png")
 if len(globed) != 0:
@@ -76,7 +76,7 @@ if len(globed) != 0:
     with open(r'cache/outputs.zip', 'rb') as f:
         bytes = f.read()
         col2.download_button(
-            label="Download Heatmaps",
+            label="Baixar Heatmaps",
             data=bytes,
             file_name='outputs.zip',
             mime='application/zip',
@@ -85,7 +85,7 @@ if len(globed) != 0:
 
 if len(globed) != 0:
     st.title("")
-    st.caption("Heatmaps Gallery:")
+    st.caption("Galeria de Heatmaps:")
     with st.container(border=True):
         globed = list(reversed(globed))
         ncols = min(2, len(globed))

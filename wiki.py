@@ -3,7 +3,7 @@ from utils.src import *
 clear_cache()
 clear_output()
 st.sidebar.write("")
-st.sidebar.header("**THERMAL BALANCE CALCULATOR**")
+st.sidebar.header("**CALCULADORA DE BALANÇO TÉRMICO**")
 st.sidebar.divider()
 st.sidebar.image(r"utils/lab_banner.png", width=300)
 add_page_title(layout='wide')
