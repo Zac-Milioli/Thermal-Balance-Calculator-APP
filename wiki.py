@@ -183,7 +183,7 @@ Abaixo um exemplo de preenchimento da classe Output\:Variable. Devem ser preench
 """)
 
 cols = st.columns([1,15,1])
-cols[1].image("utils/Variaveis_BT_ar.png")
+cols[1].image("utils/variaveis_BT_surface.png")
 
 st.title('')
 
