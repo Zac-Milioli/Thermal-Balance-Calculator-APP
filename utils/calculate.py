@@ -465,6 +465,8 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(90, "Calculating heat exchange index...")
             soma = hei_organizer(df=soma, way=way, zone=zone)
             clear_cache()
+            soma['value'] = soma['value'] / 1000
+            soma = soma.rename(columns={'value': 'value [kWh]'})
             soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'monthly':
             pbar.progress(40, "Separating months...")
@@ -489,6 +491,8 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(90, "Joining all months...")
             df_total = concatenator()
             clear_cache()
+            df_total['value'] = df_total['value'] / 1000
+            df_total = df_total.rename(columns={'value': 'value [kWh]'})
             df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'daily':
             ## Max
@@ -499,6 +503,8 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(47, "Maximum value found...")
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with maximum value")
             clear_cache()
+            df_total['value'] = df_total['value'] / 1000
+            df_total = df_total.rename(columns={'value': 'value [kWh]'})
             df_total.to_csv(output_path+'max_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             ## Min
@@ -509,6 +515,8 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(61, "Minimum value found...")
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with minimum value")
             clear_cache()
+            df_total['value'] = df_total['value'] / 1000
+            df_total = df_total.rename(columns={'value': 'value [kWh]'})
             df_total.to_csv(output_path+'min_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
         
             ## Max and Min amp locator
@@ -543,6 +551,8 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(82, "Maximum amplitude found...")
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with maximum amplitude")
             clear_cache()
+            df_total['value'] = df_total['value'] / 1000
+            df_total = df_total.rename(columns={'value': 'value [kWh]'})
             df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             # Min amp
@@ -551,5 +561,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             pbar.progress(90, "Minimum amplitude found...")
             df_total = daily_manipulator(df=input_dataframe, days_list=days_list, name=filename, way=way, zone=zone, dont_change_list=dont_change_list, pbar=pbar, legend="day with minimum amplitude")
             clear_cache()
+            df_total['value'] = df_total['value'] / 1000
+            df_total = df_total.rename(columns={'value': 'value [kWh]'})
             df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             pbar.progress(95, "Finishing...")
