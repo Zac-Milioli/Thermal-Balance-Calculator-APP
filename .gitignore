@@ -4,3 +4,4 @@ __pycache__
 *.csv
 *.zip
 output/*.png
+venv

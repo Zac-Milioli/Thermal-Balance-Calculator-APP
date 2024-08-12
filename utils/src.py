@@ -44,6 +44,5 @@ show_pages([
     Page(f'wiki.py', 'Wiki', '📖'),
     Section('Apps', icon='💻'),
     Page(f'{pages_route}calculator.py', 'Calculadora', '🧮', in_section=True),
-    Page(f'{pages_route}plotter_matplotlib.py', 'Plotar Dados (Matplotlib)', '📈', in_section=True),
-    Page(f'{pages_route}plotter_plotly.py', 'Plotar Dados (Plotly)', '📊', in_section=True)
+    Page(f'{pages_route}plotter_matplotlib.py', 'Mapas de Calor (Matplotlib)', '📈', in_section=True),
 ])

@@ -195,7 +195,7 @@ Para isso, no campo Key Value dos objetos da classe Output\:Variable, você irá
 # GRÁFICOS
 
 Além do arquivo .csv com os dados numéricos do balanço térmico, é possível obter gráficos com o valor das trocas de calor e do Heat Exchange Index (HEI). 
-Para isso, a calculadora tem duas formas de plotagem, a primeira pelo “Matplotlib” que atualmente fornece gráficos no formato mapa de calor (heatmap) e a segunda “Plotly” que será usado para gerar gráficos interativos. Este último tipo de gráfico está ainda em desenvolvimento.
+Para isso, atualmente, pode ser usado o criador automático de gráficos com “Matplotlib” que fornece gráficos no formato mapa de calor (heatmap).
 
 Para o funcionamento dos gráficos de mapa de calor o usuário deverá inserir o arquivo .csv obtido na aba “Calculadora” e escolher dentre as opções abaixo:
 
@@ -204,8 +204,9 @@ Para o funcionamento dos gráficos de mapa de calor o usuário deverá inserir o
 - **Tipo**\: Se o .csv inserido é do balanço térmico de convecção (convection) ou da superfície (surface).
 - **Plotar**\: Neste campo o usuário informa se quer plotar o gráfico da troca de calor ou do Heat Exchange Index (HEI). Se for das trocas de calor, deverá inserir Heat Exchange Values, se for do HEI, Heat Exchange Index.
 - **Localização da barra de cores**\: O usuário pode definir onde a legenda será inserida no gráfico.
-- **Insira o número de casas após a vírgula desejados**\: Esse é o arredondamento dos valores a serem indicados no **gráfico**(apenas visual).
+- **Insira o número de casas após a vírgula desejados**\: Esse é o arredondamento dos valores a serem indicados no **gráfico**(apenas visual). -1 é valor padrão que serve para não exibir os valores.
 - **Meses**\: Se a análise escolhida for Monthly, é possível colocar no gráfico todos os meses (não é recomendado, o gráfico fica com a formatação ruim) ou definir quais meses devem ser analisados.
+- **Tight layout**\: Serve para forçar o mapa de calor gerado a ser "espremido" o máximo possível (apenas visual). Uso não recomendado para mapas de calor com muitas informações pois pode haver sobreposição de legendas. No geral, recomenda-se não utilizar essa opção.
 """)
 
 st.title("")
