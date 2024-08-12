@@ -9,6 +9,7 @@ surfaces_rename = {
     "swlights": "SW Rad.\nLights",
     "solarrad": "Solar\nRad."
 }
+vals = {"HEI": "Heat Exchange Index", "value [kWh]": "Heat Exchange Values"}
 
 class HeatMap:
     def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
@@ -18,6 +19,7 @@ class HeatMap:
         self.annotate = annotate
         self.fmt = f'.{fmt}f'
         self.values = values
+        self.cbar_name = vals[self.values]
         if self.values == 'HEI':
             self.max_val = 1
             self.min_val = 0
@@ -59,7 +61,7 @@ class HeatMap:
         heatmap.set_xlabel('')
         heatmap.set_ylabel('Heat Exchange')
         heatmap.set_title(self.title)
-        heatmap.collections[0].colorbar.set_label('Heat Exchange Index (HEI)')
+        heatmap.collections[0].colorbar.set_label(self.cbar_name)
         heatmap.tick_params(left=False, bottom=True)
         plt.xticks(rotation=90, fontsize=self.sizefont)
         plt.yticks(fontsize=self.sizefont)
