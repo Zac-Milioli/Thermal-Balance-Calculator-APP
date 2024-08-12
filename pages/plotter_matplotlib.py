@@ -34,7 +34,7 @@ if csv_file:
             zones_multiselect = st.multiselect(label="Zonas", options=zones_in_df, placeholder="All Zones")
             col1, col2 = st.columns(2)
             type_opt = col1.selectbox(label="Tipo", options=["convection", "surface"], index=0, placeholder="convection")
-            vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value"}
+            vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value [kWh]"}
             use = col2.selectbox(label="Plotar", options=list(vals.keys()), index=0)
             format_use = col2.number_input(label='Insira o número de casas após a vírgula desejados (Escolha -1 caso deseje não exibir os valores)', step=1, value=-1, min_value=-1, max_value=10)
             
