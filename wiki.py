@@ -222,3 +222,20 @@ st.markdown("""
             
 Caso seja necessário baixar, é possível também. Basta clicar no botão "Baixar Heatmaps" que um arquivo .zip com todos os gráficos gerados será entregue ao usuário. 
 """)
+
+st.markdown("""
+## Teste sem fazer simulações
+
+Caso queira experimentar a calculadora antes de aplicar suas próprias simulações, preparamos alguns arquivos teste que podem ser usados para explorar as diferentes funções que esta calculadora oferece. Basta baixar, descompactar o arquivo e usar os CSV e SQL que foram disponibilizados. 
+""")
+
+col1, col2, col3 = st.columns(3)
+with open(r'utils/Test Files.zip', 'rb') as f:
+    bytes = f.read()
+    col2.download_button(
+        label="Baixar arquivos teste",
+        data=bytes,
+        file_name='Test Files.zip',
+        mime='application/zip',
+        use_container_width=True
+    )
