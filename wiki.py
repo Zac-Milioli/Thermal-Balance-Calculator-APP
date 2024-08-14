@@ -224,7 +224,7 @@ Caso seja necessário baixar, é possível também. Basta clicar no botão "Baix
 """)
 
 st.markdown("""
-## Teste sem fazer simulações
+# Teste a calculadora sem fazer simulações
 
 Caso queira experimentar a calculadora antes de aplicar suas próprias simulações, preparamos alguns arquivos teste que podem ser usados para explorar as diferentes funções que esta calculadora oferece. Basta baixar, descompactar o arquivo e usar os CSV e SQL que foram disponibilizados. 
 """)
