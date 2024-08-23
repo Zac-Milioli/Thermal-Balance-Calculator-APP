@@ -118,7 +118,8 @@ class HeatMap:
         self.order_sign()
         self.df.columns = [f'{column.split("?")[0]}?{column.split("?")[1].replace(column.split("?")[1], num_to_month[int(column.split("?")[1])])}' for column in self.df.columns]
         self.plot_heatmap(month_plot=True)
-        
+
+
 class BarPlot:
     def __init__(self, data: pd.DataFrame, target_type: str, filename: str, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
         self.data = data
