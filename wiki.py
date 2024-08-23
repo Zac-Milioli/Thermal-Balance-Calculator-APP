@@ -2,6 +2,7 @@ from utils.src import *
 
 clear_cache()
 clear_output()
+st.write('#')
 st.sidebar.write("")
 st.sidebar.header("**CALCULADORA DE BALANÇO TÉRMICO**")
 st.sidebar.divider()
