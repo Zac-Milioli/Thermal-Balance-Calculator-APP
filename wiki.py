@@ -199,18 +199,18 @@ Para isso, no campo Key Value dos objetos da classe Output\:Variable, você irá
 # GRÁFICOS
 
 Além do arquivo .csv com os dados numéricos do balanço térmico, é possível obter gráficos com o valor das trocas de calor e do Heat Exchange Index (HEI). 
-Para isso, atualmente, pode ser usado o criador automático de gráficos com “Matplotlib” que fornece gráficos no formato mapa de calor (heatmap).
+Para isso, atualmente, pode ser usado o criador automático de gráficos com “Matplotlib” que fornece gráficos no formato mapa de calor (heatmap) e gráficos de barra (barplot).
 
-Para o funcionamento dos gráficos de mapa de calor o usuário deverá inserir o arquivo .csv obtido na aba “Calculadora” e escolher dentre as opções abaixo:
+Para o funcionamento dos gráficos de mapa de calor e barras o usuário deverá inserir o arquivo .csv obtido na aba “Calculadora” e, após selecionar o tipo de gráfico desejado, escolher dentre as opções abaixo (note que as opções podem variar entre mapas de calor e barras):
 
-- **Período**\: Da mesma forma que na aba “Calculadora” existem três períodos a serem escolhidos\: annual, monthly e daily. É importante destacar que caso o arquivo inserido seja annual, deverá ser escolhido o período annual para a criação do gráfico, se for mensal, o período monthly e diário o período daily.
+- **Período**\: Da mesma forma que na aba “Calculadora” existem três períodos a serem escolhidos\: annual, monthly e daily. É importante destacar que caso o arquivo inserido seja annual, deverá ser escolhido o período annual para a criação do gráfico, se for mensal, o período monthly e diário não possui suporte para gráficos atualmente.
 - **Zonas**\: Devem ser escolhidas as zonas térmicas a serem analisadas. Importante destacar que devem ser escolhidas zonas presentes no arquivo .csv inserido na aba “Plotar Dados”.
 - **Tipo**\: Se o .csv inserido é do balanço térmico de convecção (convection) ou da superfície (surface).
 - **Plotar**\: Neste campo o usuário informa se quer plotar o gráfico da troca de calor ou do Heat Exchange Index (HEI). Se for das trocas de calor, deverá inserir Heat Exchange Values, se for do HEI, Heat Exchange Index.
 - **Localização da barra de cores**\: O usuário pode definir onde a legenda será inserida no gráfico.
 - **Insira o número de casas após a vírgula desejados**\: Esse é o arredondamento dos valores a serem indicados no **gráfico**(apenas visual). -1 é valor padrão que serve para não exibir os valores.
 - **Meses**\: Se a análise escolhida for Monthly, é possível colocar no gráfico todos os meses (não é recomendado, o gráfico fica com a formatação ruim) ou definir quais meses devem ser analisados.
-- **Tight layout**\: Serve para forçar o mapa de calor gerado a ser "espremido" o máximo possível (apenas visual). Uso não recomendado para mapas de calor com muitas informações pois pode haver sobreposição de legendas. No geral, recomenda-se não utilizar essa opção.
+- **Tight layout**\: Serve para forçar o gráfico gerado a ser "espremido" o máximo possível (apenas visual). Uso não recomendado para gráficos com muitas informações pois pode haver sobreposição de legendas. No geral, recomenda-se não utilizar essa opção.
 """)
 
 st.title("")
@@ -219,12 +219,12 @@ st.markdown("""
 Por fim, basta clicar em
 """)
 
-st.button("Criar Heatmap")
+st.button("Criar (Tipo de gráfico)")
 
 st.markdown("""
-É possível desenvolver mais de um gráfico em sequência, basta inserir os arquivos .csv que desejar e escolher seus atributos normalmente. Toda vez que o botão de "Criar Heatmap" for pressionado o novo gráfico será adicionado à "Galeria de Heatmaps".
+É possível desenvolver mais de um gráfico em sequência, basta inserir os arquivos .csv que desejar e escolher seus atributos normalmente. Toda vez que o botão de "Criar (Tipo de gráfico)" for pressionado o novo gráfico será adicionado à "Galeria de gráficos".
             
-Caso seja necessário baixar, é possível também. Basta clicar no botão "Baixar Heatmaps" que um arquivo .zip com todos os gráficos gerados será entregue ao usuário. 
+Caso seja necessário baixar, é possível também. Basta clicar no botão "Baixar gráficos" que um arquivo .zip com todos os gráficos gerados será entregue ao usuário. 
 """)
 
 st.markdown("""

@@ -119,3 +119,50 @@ class HeatMap:
         self.df.columns = [f'{column.split("?")[0]}?{column.split("?")[1].replace(column.split("?")[1], num_to_month[int(column.split("?")[1])])}' for column in self.df.columns]
         self.plot_heatmap(month_plot=True)
         
+class BarPlot:
+    def __init__(self, data: pd.DataFrame, target_type: str, filename: str, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
+        self.data = data
+        self.zones = zones
+        self.months = months
+        self.filename = filename
+        self.values = values
+        self.tight = tight
+        self.target_type = target_type
+        match self.zones:
+            case 0:
+                self.data = self.data.loc[self.data['zone'] != 'EXTERNAL']
+                self.title = f'Total BarPlot of {self.target_type} from {filename}'
+            case _:
+                self.data = self.data.loc[self.data['zone'].isin(self.zones)]    
+                self.title = f'BarPlot of {self.target_type} for zones {", ".join(self.zones)} from {filename}'
+        match self.months:
+            case 0:
+                pass
+            case _:
+                self.data = self.data.loc[self.data['month'].isin(self.months)]
+
+
+    def annual(self):
+        color_scheme = 'gist_rainbow'
+        unique_zones = self.data['zone'].unique()
+        palette = sns.color_palette(color_scheme, len(unique_zones))
+        color_map = dict(zip(unique_zones, palette))
+
+        bar_colors = self.data['zone'].map(color_map)
+
+        plt.figure(figsize=(16, 9))
+        plt.grid(True)
+        bars = plt.bar(self.data['gains_losses'], self.data[self.values], color=bar_colors)
+        plt.title(self.title)
+        plt.ylabel(self.values)
+        plt.xlabel('Ganhos e Perdas')
+        plt.xticks(rotation=25)
+
+        handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
+        labels = [zone for zone in unique_zones]
+        plt.legend(handles, labels, title='Zones')
+
+        if self.tight:
+            plt.tight_layout(True)
+        plt.savefig(f"output/{self.filename}.png", format="png")
+
