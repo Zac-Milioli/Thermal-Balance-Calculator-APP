@@ -467,6 +467,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             soma['value'] = soma['value'] / 1000
             soma = soma.rename(columns={'value': 'value [kWh]'})
+            soma['gains_losses'] = soma['gains_losses'].str.replace("none_", "")
             soma.to_csv(output_path+'annual_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'monthly':
             pbar.progress(40, "Separating months...")
@@ -493,6 +494,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             df_total['value'] = df_total['value'] / 1000
             df_total = df_total.rename(columns={'value': 'value [kWh]'})
+            df_total['gains_losses'] = df_total['gains_losses'].str.replace("none_", "")
             df_total.to_csv(output_path+'monthly_'+zones_for_name+type_name+filename, sep=',', index=False)
         case 'daily':
             ## Max
@@ -505,6 +507,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             df_total['value'] = df_total['value'] / 1000
             df_total = df_total.rename(columns={'value': 'value [kWh]'})
+            df_total['gains_losses'] = df_total['gains_losses'].str.replace("none_", "")
             df_total.to_csv(output_path+'max_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             ## Min
@@ -517,6 +520,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             df_total['value'] = df_total['value'] / 1000
             df_total = df_total.rename(columns={'value': 'value [kWh]'})
+            df_total['gains_losses'] = df_total['gains_losses'].str.replace("none_", "")
             df_total.to_csv(output_path+'min_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
         
             ## Max and Min amp locator
@@ -553,6 +557,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             df_total['value'] = df_total['value'] / 1000
             df_total = df_total.rename(columns={'value': 'value [kWh]'})
+            df_total['gains_losses'] = df_total['gains_losses'].str.replace("none_", "")
             df_total.to_csv(output_path+'max_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             
             # Min amp
@@ -563,5 +568,6 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
             clear_cache()
             df_total['value'] = df_total['value'] / 1000
             df_total = df_total.rename(columns={'value': 'value [kWh]'})
+            df_total['gains_losses'] = df_total['gains_losses'].str.replace("none_", "")
             df_total.to_csv(output_path+'min_amp_daily_'+zones_for_name+type_name+filename, sep=',', index=False)
             pbar.progress(95, "Finishing...")
