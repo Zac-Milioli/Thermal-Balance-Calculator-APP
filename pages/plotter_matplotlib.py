@@ -104,7 +104,7 @@ if csv_file:
                         else:
                             st.warning("O suporte para BarPlot mensal está ainda em desenvolvimento")
                     except:
-                        notify_barplot.error(f'Um erro ocorreu ao gerar o BarPlot. {e}', icon='⚠️')
+                        notify_barplot.error(f'Um erro ocorreu ao gerar o BarPlot.', icon='⚠️')
     else:
         notify_file.error(f'ERRO: Coluna de meses não encontrada na planilha. Altere o período para se igualar à sua planilha.', icon='⚠️')
 
