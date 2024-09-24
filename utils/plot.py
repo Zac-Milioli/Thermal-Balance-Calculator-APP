@@ -22,7 +22,7 @@ class HeatMap:
         self.values = values
         self.lang = lang
         values_en_to_pt = {
-            'HEI': "Índice de Troca de Calor",
+            'HEI': "valor absoluto da troca de calor",
             'value [kWh]': "valor [kWh]"
         }
         self.cbar_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
@@ -41,10 +41,10 @@ class HeatMap:
         match self.zones:
             case 0:
                 self.df = self.df.loc[self.df['zone'] != 'EXTERNAL']
-                self.title = f'Total HeatMap of {self.target_type_lang} from {filename}' if self.lang == "en-US" else f'Mapa de calor total de {self.target_type_lang} de {filename}'
+                self.title = f'Total HeatMap of {self.target_type_lang}' if self.lang == "en-US" else f'Mapa de calor total de {self.target_type_lang}'
             case _:
                 self.df = self.df.loc[self.df['zone'].isin(self.zones)]    
-                self.title = f'HeatMap of {self.target_type_lang} for zones {", ".join(self.zones)} from {filename}' if self.lang == "en-US" else f'Mapa de calor de {self.target_type_lang} das zonas {", ".join(self.zones)} de {filename}'
+                self.title = f'HeatMap of {self.target_type_lang} for zones {", ".join(self.zones)}' if self.lang == "en-US" else f'Mapa de calor de {self.target_type_lang} das zonas {", ".join(self.zones)}'
         match self.months:
             case 0:
                 pass
@@ -135,7 +135,7 @@ class BarPlot:
         self.values = values
         self.lang = lang
         values_en_to_pt = {
-            'HEI': "Índice de Troca de Calor",
+            'HEI': "valor absoluto da troca de calor",
             'value [kWh]': "valor [kWh]"
         }
         self.y_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
@@ -145,10 +145,10 @@ class BarPlot:
         match self.zones:
             case 0:
                 self.data = self.data.loc[self.data['zone'] != 'EXTERNAL']
-                self.title = f'Total BarPlot of {self.target_type_lang} from {filename}' if self.lang == 'en-US' else f'Gráfico de barras total de {self.target_type_lang} de {filename}'
+                self.title = f'Total BarPlot of {self.target_type_lang}' if self.lang == 'en-US' else f'Gráfico de barras total de {self.target_type_lang}'
             case _:
                 self.data = self.data.loc[self.data['zone'].isin(self.zones)]    
-                self.title = f'BarPlot of {self.target_type_lang} for zones {", ".join(self.zones)} from {filename}' if self.lang == 'en-US' else f'Gráfico de barras de {self.target_type_lang} para as zonas {", ".join(self.zones)} de {filename}'
+                self.title = f'BarPlot of {self.target_type_lang} for zones {", ".join(self.zones)}' if self.lang == 'en-US' else f'Gráfico de barras de {self.target_type_lang} para as zonas {", ".join(self.zones)}'
         match self.months:
             case 0:
                 pass
