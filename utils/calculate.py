@@ -433,13 +433,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
     """
     input_dataframe = input_dataframe.dropna()
     dicionario = read_db_and_build_dicts(selected_zones=zone, way=way, pbar=pbar)
-    if zone == 'All':
-        zones_for_name = 'All-Zones'
-    else:
-        zones_for_name = []
-        for key in dicionario.keys():
-            zones_for_name.append(key)
-        zones_for_name = '-'.join(zones_for_name)
+    zones_for_name = 'All-Zones' if zone == 'All' else 'Selected-Zones'
     input_dataframe, dont_change_list, multiply_list = renamer_and_formater(df=input_dataframe, way=way, zones_dict=dicionario, pbar=pbar)
     # São agrupadas e somadas as colunas iguais
     pbar.progress(26, "Calculating the sum of equal columns...")
