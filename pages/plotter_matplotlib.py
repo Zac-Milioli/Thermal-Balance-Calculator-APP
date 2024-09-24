@@ -53,6 +53,8 @@ if csv_file:
                         months_on_df = dataframe['month'].unique()
                         months_selected = st.multiselect(label="Meses", options=months_on_df, placeholder="All year")
                     
+                    lang = st.selectbox(label="Língua dos dados no gráfico", options=['en-US', 'pt-BR'], index=0)
+
                     st.title("")
                     col1, col2, col3 = st.columns(3)
                     if col2.form_submit_button(label='Criar Heatmap', use_container_width=True):
@@ -64,7 +66,7 @@ if csv_file:
                         filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                         notify_heatmap = st.container()
                         try:
-                            new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals, fmt=format_use)
+                            new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals, fmt=format_use, lang=lang)
                             if range_opt == 'annual':
                                 new_heatmap.annual()
                             elif range_opt == 'monthly':
@@ -85,6 +87,8 @@ if csv_file:
                     months_on_df = dataframe['month'].unique()
                     months_selected = st.multiselect(label="Meses", options=months_on_df, placeholder="All year")
                 
+                lang = st.selectbox(label="Língua dos dados no gráfico", options=['en-US', 'pt-BR'], index=0)
+                
                 st.title("")
                 col1, col2, col3 = st.columns(3)
                 if col2.form_submit_button(label='Criar BarPlot', use_container_width=True):
@@ -94,13 +98,13 @@ if csv_file:
                     filename = csv_file.name.replace(".csv", "")
                     filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                     try:
-                        new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight)
+                        new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight, lang=lang)
                         if range_opt == 'annual':
                             new_barplot.annual()
                         else:
                             st.warning("O suporte para BarPlot mensal está ainda em desenvolvimento")
                     except:
-                        notify_barplot.error(f'Um erro ocorreu ao gerar o BarPlot.', icon='⚠️')
+                        notify_barplot.error(f'Um erro ocorreu ao gerar o BarPlot. {e}', icon='⚠️')
     else:
         notify_file.error(f'ERRO: Coluna de meses não encontrada na planilha. Altere o período para se igualar à sua planilha.', icon='⚠️')
 

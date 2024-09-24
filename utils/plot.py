@@ -9,17 +9,23 @@ surfaces_rename = {
     "swlights": "SW Rad.\nLights",
     "solarrad": "Solar\nRad."
 }
-vals = {"HEI": "Heat Exchange Index", "value [kWh]": "Heat Exchange Values"}
+
 
 class HeatMap:
-    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
+    def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, lang: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
         self.df = df
         self.target_type = target_type
+        self.target_type_lang = 'convecção' if self.target_type == 'convection' else "superfície"
         self.filename = filename
         self.annotate = annotate
         self.fmt = f'.{fmt}f'
         self.values = values
-        self.cbar_name = vals[self.values]
+        self.lang = lang
+        values_en_to_pt = {
+            'HEI': "Índice de Troca de Calor",
+            'value [kWh]': "valor [kWh]"
+        }
+        self.cbar_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         if self.values == 'HEI':
             self.max_val = 1
             self.min_val = 0
@@ -35,10 +41,10 @@ class HeatMap:
         match self.zones:
             case 0:
                 self.df = self.df.loc[self.df['zone'] != 'EXTERNAL']
-                self.title = f'Total HeatMap of {self.target_type} from {filename}'
+                self.title = f'Total HeatMap of {self.target_type_lang} from {filename}' if self.lang == "en-US" else f'Mapa de calor total de {self.target_type_lang} de {filename}'
             case _:
                 self.df = self.df.loc[self.df['zone'].isin(self.zones)]    
-                self.title = f'HeatMap of {self.target_type} for zones {", ".join(self.zones)} from {filename}'
+                self.title = f'HeatMap of {self.target_type_lang} for zones {", ".join(self.zones)} from {filename}' if self.lang == "en-US" else f'Mapa de calor de {self.target_type_lang} das zonas {", ".join(self.zones)} de {filename}'
         match self.months:
             case 0:
                 pass
@@ -59,7 +65,7 @@ class HeatMap:
         cmap = LinearSegmentedColormap.from_list('Custom_cmap', colors)
         heatmap = sns.heatmap(data=self.df, vmax=self.max_val, annot=self.annotate, fmt=self.fmt, vmin=self.min_val, cmap=cmap, linewidths=1, xticklabels=True, yticklabels=True, cbar_kws = self.cbar_kws)
         heatmap.set_xlabel('')
-        heatmap.set_ylabel('Heat Exchange')
+        heatmap.set_ylabel('Heat Exchange' if self.lang == 'en-US' else "Trocas de calor")
         heatmap.set_title(self.title)
         heatmap.collections[0].colorbar.set_label(self.cbar_name)
         heatmap.tick_params(left=False, bottom=True)
@@ -121,21 +127,28 @@ class HeatMap:
 
 
 class BarPlot:
-    def __init__(self, data: pd.DataFrame, target_type: str, filename: str, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
+    def __init__(self, data: pd.DataFrame, target_type: str, filename: str, lang: str, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
         self.data = data
         self.zones = zones
         self.months = months
         self.filename = filename
         self.values = values
+        self.lang = lang
+        values_en_to_pt = {
+            'HEI': "Índice de Troca de Calor",
+            'value [kWh]': "valor [kWh]"
+        }
+        self.y_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         self.tight = tight
         self.target_type = target_type
+        self.target_type_lang = 'convecção' if self.target_type == 'convection' else "superfície"
         match self.zones:
             case 0:
                 self.data = self.data.loc[self.data['zone'] != 'EXTERNAL']
-                self.title = f'Total BarPlot of {self.target_type} from {filename}'
+                self.title = f'Total BarPlot of {self.target_type_lang} from {filename}' if self.lang == 'en-US' else f'Gráfico de barras total de {self.target_type_lang} de {filename}'
             case _:
                 self.data = self.data.loc[self.data['zone'].isin(self.zones)]    
-                self.title = f'BarPlot of {self.target_type} for zones {", ".join(self.zones)} from {filename}'
+                self.title = f'BarPlot of {self.target_type_lang} for zones {", ".join(self.zones)} from {filename}' if self.lang == 'en-US' else f'Gráfico de barras de {self.target_type_lang} para as zonas {", ".join(self.zones)} de {filename}'
         match self.months:
             case 0:
                 pass
@@ -155,13 +168,13 @@ class BarPlot:
         plt.grid(True)
         bars = plt.bar(self.data['gains_losses'], self.data[self.values], color=bar_colors)
         plt.title(self.title)
-        plt.ylabel(self.values)
-        plt.xlabel('Ganhos e Perdas')
+        plt.ylabel(self.y_name)
+        plt.xlabel('Gains and Losses' if self.lang == 'en-US' else "Ganhos e Perdas")
         plt.xticks(rotation=25)
 
         handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
         labels = [zone for zone in unique_zones]
-        plt.legend(handles, labels, title='Zones')
+        plt.legend(handles, labels, title='Zones' if self.lang == 'en-US' else 'Zonas')
 
         if self.tight:
             plt.tight_layout(True)
