@@ -15,12 +15,18 @@ class HeatMap:
     def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, lang: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
         self.df = df
         self.target_type = target_type
-        self.target_type_lang = 'convecção' if self.target_type == 'convection' else "superfície"
+        self.lang = lang
+        if self.lang == 'pt-BR':
+            if self.target_type == 'convection':
+                self.target_type_lang = 'convecção'
+            elif self.target_type == 'surface':
+                self.target_type_lang = 'superfície'
+        else:
+            self.target_type_lang == self.target_type
         self.filename = filename
         self.annotate = annotate
         self.fmt = f'.{fmt}f'
         self.values = values
-        self.lang = lang
         values_en_to_pt = {
             'HEI': "valor absoluto da troca de calor",
             'value [kWh]': "valor [kWh]"
@@ -141,7 +147,13 @@ class BarPlot:
         self.y_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         self.tight = tight
         self.target_type = target_type
-        self.target_type_lang = 'convecção' if self.target_type == 'convection' else "superfície"
+        if self.lang == 'pt-BR':
+            if self.target_type == 'convection':
+                self.target_type_lang = 'convecção'
+            elif self.target_type == 'surface':
+                self.target_type_lang = 'superfície'
+        else:
+            self.target_type_lang == self.target_type
         match self.zones:
             case 0:
                 self.data = self.data.loc[self.data['zone'] != 'EXTERNAL']
