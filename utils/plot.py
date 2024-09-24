@@ -10,6 +10,10 @@ surfaces_rename = {
     "solarrad": "Solar\nRad."
 }
 
+values_en_to_pt = {
+    'HEI': "índice de troca de calor",
+    'value [kWh]': "valor absoluto da troca de calor [kWh]"
+}
 
 class HeatMap:
     def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, lang: str, annotate: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
@@ -27,10 +31,6 @@ class HeatMap:
         self.annotate = annotate
         self.fmt = f'.{fmt}f'
         self.values = values
-        values_en_to_pt = {
-            'HEI': "valor absoluto da troca de calor",
-            'value [kWh]': "valor [kWh]"
-        }
         self.cbar_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         if self.values == 'HEI':
             self.max_val = 1
@@ -140,10 +140,6 @@ class BarPlot:
         self.filename = filename
         self.values = values
         self.lang = lang
-        values_en_to_pt = {
-            'HEI': "valor absoluto da troca de calor",
-            'value [kWh]': "valor [kWh]"
-        }
         self.y_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         self.tight = tight
         self.target_type = target_type
