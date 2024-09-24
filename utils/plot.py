@@ -22,7 +22,7 @@ class HeatMap:
             elif self.target_type == 'surface':
                 self.target_type_lang = 'superfície'
         else:
-            self.target_type_lang == self.target_type
+            self.target_type_lang = self.target_type
         self.filename = filename
         self.annotate = annotate
         self.fmt = f'.{fmt}f'
@@ -153,7 +153,7 @@ class BarPlot:
             elif self.target_type == 'surface':
                 self.target_type_lang = 'superfície'
         else:
-            self.target_type_lang == self.target_type
+            self.target_type_lang = self.target_type
         match self.zones:
             case 0:
                 self.data = self.data.loc[self.data['zone'] != 'EXTERNAL']
