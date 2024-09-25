@@ -106,7 +106,7 @@ class HeatMap:
             ax.tick_params(bottom=False) 
         if self.tight:
             plt.tight_layout()
-        plt.savefig(f"output/{self.filename}.png", format="png")
+        plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
     def month_number(self, column_name):
         month_num = int(column_name.split('?')[1])
@@ -133,22 +133,25 @@ class HeatMap:
 
 
 class BarPlot:
-    def __init__(self, data: pd.DataFrame, target_type: str, filename: str, lang: str, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
+    def __init__(self, data: pd.DataFrame, target_type: str, filename: str, lang: str, all_in_one: bool, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
         self.data = data
         self.zones = zones
         self.months = months
         self.filename = filename
+        self.all_in_one = all_in_one
         self.values = values
         self.lang = lang
         self.y_name = self.values if self.lang == 'en-US' else values_en_to_pt[self.values]
         self.tight = tight
         self.target_type = target_type
         if self.lang == 'pt-BR':
+            self.zone_lang = 'Zona'
             if self.target_type == 'convection':
                 self.target_type_lang = 'convecção'
             elif self.target_type == 'surface':
                 self.target_type_lang = 'superfície'
         else:
+            self.zone_lang = 'Zone'
             self.target_type_lang = self.target_type
         match self.zones:
             case 0:
@@ -156,13 +159,12 @@ class BarPlot:
                 self.title = f'Total BarPlot of {self.target_type_lang}' if self.lang == 'en-US' else f'Gráfico de barras total de {self.target_type_lang}'
             case _:
                 self.data = self.data.loc[self.data['zone'].isin(self.zones)]    
-                self.title = f'BarPlot of {self.target_type_lang} for zones {", ".join(self.zones)}' if self.lang == 'en-US' else f'Gráfico de barras de {self.target_type_lang} para as zonas {", ".join(self.zones)}'
+                self.title = f'BarPlot of {self.target_type_lang}' if self.lang == 'en-US' else f'Gráfico de barras de {self.target_type_lang}'
         match self.months:
             case 0:
                 pass
             case _:
                 self.data = self.data.loc[self.data['month'].isin(self.months)]
-
 
     def annual(self):
         color_scheme = 'gist_rainbow'
@@ -170,23 +172,54 @@ class BarPlot:
         palette = sns.color_palette(color_scheme, len(unique_zones))
         color_map = dict(zip(unique_zones, palette))
 
-        bar_colors = self.data['zone'].map(color_map)
+        if self.all_in_one:
+            bar_colors = self.data['zone'].map(color_map)
+            plt.figure(figsize=(16, 9))
+            plt.grid(True)
+            bars = plt.bar(self.data['gains_losses'], self.data[self.values], color=bar_colors)
+            plt.title(self.title)
+            plt.ylabel(self.y_name)
+            plt.xlabel('Gains and Losses' if self.lang == 'en-US' else "Ganhos e Perdas")
+            plt.xticks(rotation=25)
 
-        plt.figure(figsize=(16, 9))
-        plt.grid(True)
-        bars = plt.bar(self.data['gains_losses'], self.data[self.values], color=bar_colors)
-        plt.title(self.title)
-        plt.ylabel(self.y_name)
-        plt.xlabel('Gains and Losses' if self.lang == 'en-US' else "Ganhos e Perdas")
-        plt.xticks(rotation=25)
+            handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
+            labels = [zone for zone in unique_zones]
+            plt.legend(handles, labels, title='Zones' if self.lang == 'en-US' else 'Zonas', loc='upper right')
 
-        plt.axhline(0, color='red', linewidth=2)
+            if self.tight:
+                plt.tight_layout(rect=[0, 0, 1, 0.96])
 
-        handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
-        labels = [zone for zone in unique_zones]
-        plt.legend(handles, labels, title='Zones' if self.lang == 'en-US' else 'Zonas')
+            plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
+        else:
+            num_zones = len(unique_zones)
+            num_cols = 2 
+            num_rows = math.ceil(num_zones / num_cols)
 
-        if self.tight:
-            plt.tight_layout(True)
-        plt.savefig(f"output/{self.filename}.png", format="png")
+            fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 5 * num_rows), sharex=False)
+            axes = axes.flatten()
 
+            for ax, zone in zip(axes, unique_zones):
+                zone_data = self.data[self.data['zone'] == zone]
+                bar_colors = zone_data['zone'].map(color_map)
+                bars = ax.bar(zone_data['gains_losses'], zone_data[self.values], color=bar_colors)
+                ax.set_title(f'{self.title} - {self.zone_lang} {zone}', fontsize=12)
+                ax.set_ylabel(self.y_name)
+                ax.axhline(0, color='red', linewidth=2)
+                ax.grid(True)
+                ax.set_xticks(range(len(zone_data['gains_losses'])))
+                ax.set_xticklabels(zone_data['gains_losses'], rotation=45, ha='right')
+
+            for i in range(len(unique_zones), len(axes)):
+                fig.delaxes(axes[i])
+
+            handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
+            labels = [zone for zone in unique_zones]
+            fig.legend(handles, labels, title='Zones' if self.lang == 'en-US' else 'Zonas', loc='upper right')
+
+            plt.subplots_adjust(hspace=0.6, wspace=0.4)
+            fig.suptitle(self.title, fontsize=16)
+
+            if self.tight:
+                plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+            plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)

@@ -83,6 +83,7 @@ if csv_file:
                 vals = {"Heat Exchange Index": "HEI", "Heat Exchange Values": "value [kWh]"}
                 use = col2.selectbox(label="Plotar", options=list(vals.keys()), index=0)
                 use_tight = col1.checkbox(label="Tight layout (Espremer o gráfico para telas menores, pode haver sobreposição)")
+                all_in_one = col2.checkbox(label='Inserir todas as zonas em apenas um gráfico')
                 if range_opt == 'monthly':
                     months_on_df = dataframe['month'].unique()
                     months_selected = st.multiselect(label="Meses", options=months_on_df, placeholder="All year")
@@ -98,7 +99,7 @@ if csv_file:
                     filename = csv_file.name.replace(".csv", "")
                     filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                     try:
-                        new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight, lang=lang)
+                        new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight, lang=lang, all_in_one=all_in_one)
                         if range_opt == 'annual':
                             new_barplot.annual()
                         else:
