@@ -47,7 +47,8 @@ if csv_file:
                     
                     cbar_loc = col1.radio(label="Localização da barra de cores", options=["bottom", "right", "top", "left"], index=0, horizontal=True)
                     use_tight = col1.checkbox(label="Tight layout (Espremer o gráfico para telas menores, pode haver sobreposição)")
-
+                    separate_zones = st.checkbox(label='Separar as zonas em diferentes HeatMaps')
+                    
                     months_selected = False
                     if range_opt == 'monthly':
                         months_on_df = dataframe['month'].unique()
@@ -66,13 +67,14 @@ if csv_file:
                         filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                         notify_heatmap = st.container()
                         try:
-                            new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals, fmt=format_use, lang=lang)
-                            if range_opt == 'annual':
-                                new_heatmap.annual()
-                            elif range_opt == 'monthly':
-                                new_heatmap.monthly()
-                        except:
-                            notify_heatmap.error(f'Um erro ocorreu ao gerar o Heatmap.', icon='⚠️')
+                            with st.spinner('Gerando HeatMap...'):
+                                new_heatmap = HeatMap(df=dataframe, target_type=type_opt, zones=zones_opt, months=months_opt, tight=use_tight, cbar_orientation=cbar_loc, filename=filename, values=vals[use], annotate=annot_vals, fmt=format_use, lang=lang, separate_zones=separate_zones)
+                                if range_opt == 'annual':
+                                    new_heatmap.annual()
+                                elif range_opt == 'monthly':
+                                    new_heatmap.monthly()
+                        except Exception as e:
+                            notify_heatmap.error(f'Um erro ocorreu ao gerar o Heatmap. {e}', icon='⚠️')
         with barplots:
             with st.form("form_plotter_barplot", border=False):
                 zones_in_df = dataframe["zone"].unique()
@@ -99,11 +101,12 @@ if csv_file:
                     filename = csv_file.name.replace(".csv", "")
                     filename = f"{filename}_{datetime.now().strftime('%H-%M-%S_%d-%m')}"
                     try:
-                        new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight, lang=lang, all_in_one=all_in_one)
-                        if range_opt == 'annual':
-                            new_barplot.annual()
-                        else:
-                            st.warning("O suporte para BarPlot mensal está ainda em desenvolvimento")
+                        with st.spinner('Gerando BarPlot...'):
+                            new_barplot = BarPlot(data=dataframe, target_type=type_opt, filename=filename, values=vals[use], zones=zones_opt, months=months_opt, tight=use_tight, lang=lang, all_in_one=all_in_one)
+                            if range_opt == 'annual':
+                                new_barplot.annual()
+                            else:
+                                st.warning("O suporte para BarPlot mensal está ainda em desenvolvimento")
                     except:
                         notify_barplot.error(f'Um erro ocorreu ao gerar o BarPlot.', icon='⚠️')
     else:

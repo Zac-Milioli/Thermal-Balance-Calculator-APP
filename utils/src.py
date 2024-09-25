@@ -13,6 +13,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import zipfile
 import warnings
 import math
+from PIL import Image
 warnings.filterwarnings('ignore')
 
 def clear_cache():
