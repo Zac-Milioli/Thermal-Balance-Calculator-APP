@@ -180,6 +180,8 @@ class BarPlot:
         plt.xlabel('Gains and Losses' if self.lang == 'en-US' else "Ganhos e Perdas")
         plt.xticks(rotation=25)
 
+        plt.axhline(0, color='red', linewidth=2)
+
         handles = [plt.Rectangle((0,0),1,1, color=color_map[zone]) for zone in unique_zones]
         labels = [zone for zone in unique_zones]
         plt.legend(handles, labels, title='Zones' if self.lang == 'en-US' else 'Zonas')
