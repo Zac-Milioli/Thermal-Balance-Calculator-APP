@@ -2,7 +2,6 @@ from utils.src import *
 
 Image.MAX_IMAGE_PIXELS = 178956970
 
-num_to_month = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
 surfaces_rename = {
     "conduction": "Conduction",
     "convection": "Convection",
@@ -16,6 +15,8 @@ values_en_to_pt = {
     'HEI': "índice de troca de calor",
     'value [kWh]': "valor absoluto da troca de calor [kWh]"
 }
+
+num_to_month = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
 
 class HeatMap:
     def __init__(self, df: pd.DataFrame, target_type: str, zones: list, months: list, cbar_orientation: str, filename: str, values: str, lang: str, annotate: bool, separate_zones: bool, fmt: int = 2, sizefont: float = 10, tight: bool = False):
@@ -104,13 +105,6 @@ class HeatMap:
                 splited = [label.get_text().split('?') for label in labels]
             new_labels = [name[0] for name in splited]
             ax.set_xticklabels(new_labels, rotation=45, fontsize=self.sizefont)
-            ax2 = ax.twiny()
-            ax2.set_xticks(ax.get_xticks())
-            new_labels2 = [name[1] for name in splited]
-            ax2.set_xticklabels(new_labels2, rotation=45, fontsize=self.sizefont)
-            ax.xaxis.tick_bottom()
-            ax2.xaxis.tick_top()
-            ax.tick_params(bottom=False) 
 
     def annual(self):
         if self.separate_zones:
@@ -184,6 +178,8 @@ class HeatMap:
                 title = f'{self.title} - {zone}' if self.lang == 'en-US' else f'{self.title} - {zone}'
                 self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax, month_plot=True)
 
+                ax.set_xticklabels(zone_pivot.columns, rotation=45, fontsize=self.sizefont)
+
             for i in range(len(unique_zones), len(axes)):
                 fig.delaxes(axes[i])
 
@@ -203,9 +199,9 @@ class HeatMap:
             self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
             self.df = self.df[sorted(self.df.columns, key=self.month_number)]
             self.order_sign(self.df)
-            self.df.columns = [f'{column.split("?")[0]}?{column.split("?")[1].replace(column.split("?")[1], num_to_month[int(column.split("?")[1])])}' for column in self.df.columns]
+            self.df.columns = [f'{column.split("?")[0]}?{num_to_month[int(column.split("?")[1])]} ({column.split("?")[1]})' for column in self.df.columns]
 
-            unique_months = sorted(self.df.columns.str.split('?').str[1].unique(), key=lambda x: list(num_to_month.values()).index(x))
+            unique_months = sorted(self.df.columns.str.split('?').str[1].unique(), key=lambda x: list(num_to_month.values()).index(x.split(' ')[0]))
             num_months = len(unique_months)
             num_cols = 2
             num_rows = math.ceil(num_months / num_cols)
@@ -219,8 +215,8 @@ class HeatMap:
                 cbar_ax = fig.add_axes([0.15, 0.93, 0.7, 0.02]) if self.cbar_orientation == 'top' else fig.add_axes([0.15, 0.05, 0.7, 0.02])
 
             for ax, month in zip(axes, unique_months):
-                month_data = self.df.filter(like=f'?{month}', axis=1)
-                title = f'{self.title} - {month}' if self.lang == 'en-US' else f'{self.title} - {num_to_month[month]}'
+                month_data = self.df.filter(like=f'?{month.split(" ")[0]}', axis=1)
+                title = f'{self.title} - {month.split(" ")[0]}' if self.lang == 'en-US' else f'{self.title} - {month.split(" ")[0]}'
                 self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
 
             for i in range(len(unique_months), len(axes)):
@@ -239,14 +235,14 @@ class HeatMap:
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
     def month_number(self, column_name):
-        month_name = column_name.split('?')[1]
-        month_num = list(num_to_month.values()).index(month_name) + 1
+        month_num = int(column_name.split('?')[1])
         return month_num
     
     def order_sign(self, df):
         df_plus = df[[sign[-1] == '+' for sign in df.index]]
         df_mins = df[[sign[-1] == '-' for sign in df.index]]
         return pd.concat([df_plus, df_mins], axis=0)
+    
 
 class BarPlot:
     def __init__(self, data: pd.DataFrame, target_type: str, filename: str, lang: str, all_in_one: bool, zones: list = "All zones", months: list = "All year", values: str = "value [kWh]", tight: bool = False):
