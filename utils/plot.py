@@ -107,7 +107,7 @@ class HeatMap:
             ax.set_xticklabels(new_labels, rotation=45, fontsize=self.sizefont)
 
     def annual(self):
-        if self.separate_zones:
+        if self.separate_zones and self.target_type == 'convection':
             unique_zones = self.df['zone'].unique()
             num_zones = len(unique_zones)
             num_cols = 2
@@ -128,6 +128,17 @@ class HeatMap:
                 title = f'{self.title} - {zone}' if self.lang == 'en-US' else f'{self.title} - {zone}'
                 self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
 
+                if self.target_type == 'surface':
+                    flux_type = [zone.split('|')[1] for zone in zone_pivot.columns]
+                    flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
+                    bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                    top_labels = [flux_type.pop(0) for _ in bottom_labels if flux_type]
+                    ax.set_xticks(ax.get_xticks())
+                    ax.set_xticklabels(bottom_labels, rotation=45, fontsize=self.sizefont)
+                    ax_secondary = ax.twiny()
+                    ax_secondary.set_xticks(ax.get_xticks())
+                    ax_secondary.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
+
             for i in range(len(unique_zones), len(axes)):
                 fig.delaxes(axes[i])
 
@@ -141,17 +152,71 @@ class HeatMap:
             if self.tight:
                 plt.tight_layout(rect=[0, 0, 1, 0.96])
 
+            plt.subplots_adjust(top=0.85)
+
+            plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
+        elif self.separate_zones and self.target_type == 'surface':
+            unique_zones = self.df['zone'].unique()
+            num_zones = len(unique_zones)
+            num_cols = 2
+            num_rows = math.ceil(num_zones / num_cols)
+
+            fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, 6 * num_rows), sharex=False)
+            axes = axes.flatten()
+
+            for ax, zone in zip(axes, unique_zones):
+                zone_data = self.df[self.df['zone'] == zone]
+                zone_pivot = zone_data.pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
+                zone_pivot = self.order_sign(zone_pivot)
+                self.plot_heatmap(zone_pivot, ax, f'{self.title} - {zone}')
+
+                flux_type = [zone.split('|')[1] for zone in zone_pivot.columns]
+                flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
+                bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                top_labels = [flux_type.pop(0) for _ in bottom_labels if flux_type]
+                ax.set_xticks(ax.get_xticks())
+                ax.set_xticklabels(bottom_labels, rotation=45, fontsize=self.sizefont)
+                ax_secondary = ax.twiny()
+                ax_secondary.set_xticks(ax.get_xticks())
+                ax_secondary.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
+
+            for i in range(len(unique_zones), len(axes)):
+                fig.delaxes(axes[i])
+
+            plt.subplots_adjust(hspace=0.6, wspace=0.4)
+            fig.suptitle(self.title, fontsize=16)
+
+            if self.tight:
+                plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+            plt.subplots_adjust(top=0.85)
+
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
         else:
             self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
+            if self.target_type == 'surface':
+                flux_type = [zone.split('|')[1] for zone in self.df.columns]
+                flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
             self.df = self.order_sign(self.df)
 
             plt.figure(figsize=(16, 9))
             plt.grid(True)
             self.plot_heatmap(self.df, plt.gca(), self.title)
 
+            if self.target_type == 'surface':
+                ax = plt.gca()
+                bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                top_labels = [flux_type.pop(0) for _ in bottom_labels]
+                ax.set_xticks(ax.get_xticks())
+                ax.set_xticklabels(bottom_labels, rotation=45, fontsize=self.sizefont)
+                ax_secondary = ax.twiny()
+                ax_secondary.set_xticks(ax.get_xticks())
+                ax_secondary.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
+
             if self.tight:
                 plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+            plt.subplots_adjust(top=0.85)
 
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
@@ -193,6 +258,8 @@ class HeatMap:
             if self.tight:
                 plt.tight_layout(rect=[0, 0, 1, 0.96])
 
+            plt.subplots_adjust(top=0.85)
+
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
         else:
             self.df['zone'] = self.df.apply(lambda row: f'{row["zone"]}?{row["month"]}', axis=1)
@@ -231,6 +298,8 @@ class HeatMap:
 
             if self.tight:
                 plt.tight_layout(rect=[0, 0, 1, 0.96])
+
+            plt.subplots_adjust(top=0.85)
 
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
