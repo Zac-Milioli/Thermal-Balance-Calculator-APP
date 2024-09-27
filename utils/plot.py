@@ -195,7 +195,7 @@ class HeatMap:
         if self.separate_zones:
             unique_zones = self.df['zone'].unique()
             num_zones = len(unique_zones)
-            num_cols = 2
+            num_cols = 1 if self.target_type == 'surface' else 2
             num_rows = math.ceil(num_zones / num_cols)
 
             fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, 6 * num_rows), sharex=False)
@@ -235,13 +235,16 @@ class HeatMap:
         else:
             self.df['zone'] = self.df.apply(lambda row: f'{row["zone"]}?{row["month"]}', axis=1)
             self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
+            if self.target_type == 'surface':
+                flux_type = [zone.split('|')[1].split('?')[0] for zone in self.df.columns]
+                flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
             self.df = self.df[sorted(self.df.columns, key=self.month_number)]
             self.order_sign(self.df)
             self.df.columns = [f'{column.split("?")[0]}?{num_to_month[int(column.split("?")[1])]} ({column.split("?")[1]})' for column in self.df.columns]
 
             unique_months = sorted(self.df.columns.str.split('?').str[1].unique(), key=lambda x: list(num_to_month.values()).index(x.split(' ')[0]))
             num_months = len(unique_months)
-            num_cols = 2
+            num_cols = 1 if self.target_type == 'surface' else 2
             num_rows = math.ceil(num_months / num_cols)
 
             fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, 6 * num_rows), sharex=False)
@@ -256,11 +259,24 @@ class HeatMap:
                 month_data = self.df.filter(like=f'?{month.split(" ")[0]}', axis=1)
                 title = f'{self.title} - {month.split(" ")[0]}' if self.lang == 'en-US' else f'{self.title} - {month.split(" ")[0]}'
                 self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
+                if self.target_type == 'surface':
+                    bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                    top_labels = [flux_type.pop(0) for _ in bottom_labels]
+                    
+                    ax.set_xticks(ax.get_xticks())
+                    ax.set_xticklabels(bottom_labels, rotation=45, fontsize=self.sizefont)
+                    
+                    ax_secondary = ax.twiny()
+                    ax_secondary.set_xlim(ax.get_xlim())
+                    ax_secondary.set_xticks(ax.get_xticks())
+                    ax_secondary.spines['top'].set_position(('outward', 0))
+                    ax_secondary.set_xticklabels(top_labels, rotation=80, fontsize=self.sizefont)
+                    
 
             for i in range(len(unique_months), len(axes)):
                 fig.delaxes(axes[i])
 
-            plt.subplots_adjust(hspace=0.6, wspace=0.4)
+            plt.subplots_adjust(hspace=0.8, wspace=0.4)
             fig.suptitle(self.title, fontsize=16)
 
             cbar = fig.colorbar(axes[0].collections[0], cax=cbar_ax, orientation='horizontal' if self.cbar_orientation in ['top', 'bottom'] else 'vertical')
@@ -270,7 +286,7 @@ class HeatMap:
             if self.tight:
                 plt.tight_layout(rect=[0, 0, 1, 0.96])
 
-            plt.subplots_adjust(top=0.85)
+            plt.subplots_adjust(top=0.94)
 
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
