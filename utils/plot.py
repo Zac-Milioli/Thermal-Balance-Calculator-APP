@@ -88,15 +88,21 @@ class HeatMap:
         ax.set_yticklabels(ax.get_yticklabels(), fontsize=self.sizefont)
         if self.target_type == 'surface' or month_plot:
             labels = ax.get_xticklabels()
+            flux_list = []
             if self.target_type == 'surface' and month_plot:
                 splited = [label.get_text().split('|') for label in labels]
-                splited = [[name[0], name[1].replace('?',' ')] for name in splited]
-                try:
-                    splited = [[name[0], name[1].replace(name[1].split(' ')[0], surfaces_rename[name[1].split(' ')[0]])] for name in splited]
-                except:
-                    splited = [[name[0], name[1].title()] for name in splited]
+                print(f"{splited =}")
+                # flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
+                # flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
+                # splited = [[name[0], name[1].replace('?',' ')] for name in splited]
+                # try:
+                    # splited = [[name[0], name[1].replace(name[1].split(' ')[0], surfaces_rename[name[1].split(' ')[0]])] for name in splited]
+                # except:
+                    # splited = [[name[0], name[1].title()] for name in splited]
             elif self.target_type == 'surface':
                 splited = [label.get_text().split('|') for label in labels]
+                flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
+                flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
                 try:
                     splited = [[name[0], name[1].replace(name[1], surfaces_rename[name[1]])] for name in splited]
                 except:
@@ -105,6 +111,7 @@ class HeatMap:
                 splited = [label.get_text().split('?') for label in labels]
             new_labels = [name[0] for name in splited]
             ax.set_xticklabels(new_labels, rotation=45, fontsize=self.sizefont)
+            return flux_list
 
     def annual(self):
         if self.separate_zones:
@@ -139,9 +146,7 @@ class HeatMap:
                     zone_parts = zone.split("|")
                     zone_title = zone_parts[0] if isinstance(zone_parts, list) else zone
                     title = f'{self.title} - {zone_title}'
-                    self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
-                    flux_type = [zone.split('|')[1] for zone in zone_pivot.columns]
-                    flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
+                    flux_type = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
                     bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
                     top_labels = [flux_type.pop(0) for _ in bottom_labels if flux_type]
                     ax.set_xticks(ax.get_xticks())
@@ -192,6 +197,8 @@ class HeatMap:
             plt.savefig(f"output/{self.filename}.png", format="png", dpi=300)
 
     def monthly(self):
+        print('\n\n\n\n')
+        print('- '*60)
         if self.separate_zones:
             unique_zones = self.df['zone'].unique()
             num_zones = len(unique_zones)
@@ -206,15 +213,36 @@ class HeatMap:
             else:
                 cbar_ax = fig.add_axes([0.15, 0.93, 0.7, 0.02]) if self.cbar_orientation == 'top' else fig.add_axes([0.15, 0.05, 0.7, 0.02])
 
-            for ax, zone in zip(axes, unique_zones):
-                zone_data = self.df[self.df['zone'] == zone]
-                zone_pivot = zone_data.pivot_table(index='gains_losses', columns='month', values=self.values).fillna(0)
-                zone_pivot.columns = [num_to_month[int(col)] for col in zone_pivot.columns]
-                self.order_sign(zone_pivot)
-                title = f'{self.title} - {zone}' if self.lang == 'en-US' else f'{self.title} - {zone}'
-                self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax, month_plot=True)
+            if self.target_type == 'convection':
+                for ax, zone in zip(axes, unique_zones):
+                    zone_data = self.df[self.df['zone'] == zone]
+                    zone_pivot = zone_data.pivot_table(index='gains_losses', columns='month', values=self.values).fillna(0)
+                    zone_pivot.columns = [num_to_month[int(col)] for col in zone_pivot.columns]
+                    self.order_sign(zone_pivot)
+                    title = f'{self.title} - {zone}'
+                    flux_type = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax, month_plot=True)
+                    ax.set_xticklabels(zone_pivot.columns, rotation=45, fontsize=self.sizefont)
 
-                ax.set_xticklabels(zone_pivot.columns, rotation=45, fontsize=self.sizefont)
+            else:
+                for ax, zone in zip(axes, unique_zones):
+                    zone_data = self.df[self.df['zone'] == zone]
+                    zone_data['zone'] = zone_data.apply(lambda row: f'{row["zone"]}|{row["flux"]}?{row["month"]}', axis=1)
+                    zone_pivot = zone_data.pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
+                    zone_pivot = self.order_sign(zone_pivot)
+                    print(zone_pivot)
+                    print(zone_pivot.columns.tolist())
+                    zone_parts = zone.split("|")
+                    zone_title = zone_parts[0] if isinstance(zone_parts, list) else zone
+                    title = f'{self.title} - {zone_title}'
+                    flux_type = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
+                    bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                    top_labels = [flux_type.pop(0) for _ in bottom_labels if flux_type]
+                    ax_secondary = ax.twiny()
+                    ax.set_xticks(ax.get_xticks())
+                    ax.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
+                    ax_secondary.set_xticks(ax.get_xticks())
+                    ax_secondary.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
+
 
             for i in range(len(unique_zones), len(axes)):
                 fig.delaxes(axes[i])
@@ -235,9 +263,6 @@ class HeatMap:
         else:
             self.df['zone'] = self.df.apply(lambda row: f'{row["zone"]}?{row["month"]}', axis=1)
             self.df = self.df[['gains_losses', 'zone', self.values]].pivot_table(index='gains_losses', columns='zone', values=self.values).fillna(0)
-            if self.target_type == 'surface':
-                flux_type = [zone.split('|')[1].split('?')[0] for zone in self.df.columns]
-                flux_type = [surfaces_rename.get(flux, flux) for flux in flux_type]
             self.df = self.df[sorted(self.df.columns, key=self.month_number)]
             self.order_sign(self.df)
             self.df.columns = [f'{column.split("?")[0]}?{num_to_month[int(column.split("?")[1])]} ({column.split("?")[1]})' for column in self.df.columns]
@@ -258,10 +283,10 @@ class HeatMap:
             for ax, month in zip(axes, unique_months):
                 month_data = self.df.filter(like=f'?{month.split(" ")[0]}', axis=1)
                 title = f'{self.title} - {month.split(" ")[0]}' if self.lang == 'en-US' else f'{self.title} - {month.split(" ")[0]}'
-                self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
+                flux_list = self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
                 if self.target_type == 'surface':
                     bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
-                    top_labels = [flux_type.pop(0) for _ in bottom_labels]
+                    top_labels = [flux_list.pop(0) for _ in bottom_labels]
                     
                     ax.set_xticks(ax.get_xticks())
                     ax.set_xticklabels(bottom_labels, rotation=45, fontsize=self.sizefont)
