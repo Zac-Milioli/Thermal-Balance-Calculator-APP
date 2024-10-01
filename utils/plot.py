@@ -289,7 +289,8 @@ class HeatMap:
             num_cols = 1 if self.target_type == 'surface' else 2
             num_rows = math.ceil(num_months / num_cols)
 
-            fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, 6 * num_rows), sharex=False)
+            multiplier = 10 if self.target_type == 'convection' else 6
+            fig, axes = plt.subplots(num_rows, num_cols, figsize=(16, multiplier * num_rows), sharex=False)
             axes = axes.flatten()
 
             if self.cbar_orientation in ['right', 'left']:
@@ -300,7 +301,7 @@ class HeatMap:
             for ax, month in zip(axes, unique_months):
                 month_data = self.df.filter(like=f'?{month.split(" ")[0]}', axis=1)
                 title = f'{self.title} - {month.split(" ")[0]}' if self.lang == 'en-US' else f'{self.title} - {month.split(" ")[0]}'
-                flux_list = self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
+                flux_list, _ = self.plot_heatmap(month_data, ax, title, cbar_ax=cbar_ax, month_plot=True)
                 if self.target_type == 'surface':
                     bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
                     top_labels = [flux_list.pop(0) for _ in bottom_labels]
@@ -318,7 +319,7 @@ class HeatMap:
             for i in range(len(unique_months), len(axes)):
                 fig.delaxes(axes[i])
 
-            plt.subplots_adjust(hspace=0.8, wspace=0.4)
+            plt.subplots_adjust(hspace=0.8 if self.target_type == 'surface' else 0.5, wspace=0.4)
             fig.suptitle(self.title, fontsize=16)
 
             cbar = fig.colorbar(axes[0].collections[0], cax=cbar_ax, orientation='horizontal' if self.cbar_orientation in ['top', 'bottom'] else 'vertical')

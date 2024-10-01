@@ -73,8 +73,8 @@ if csv_file:
                                     new_heatmap.annual()
                                 elif range_opt == 'monthly':
                                     new_heatmap.monthly()
-                        except Exception as e:
-                            notify_heatmap.error(f'Um erro ocorreu ao gerar o Heatmap. {e}', icon='⚠️')
+                        except:
+                            notify_heatmap.error(f'Um erro ocorreu ao gerar o Heatmap.', icon='⚠️')
         with barplots:
             with st.form("form_plotter_barplot", border=False):
                 zones_in_df = dataframe["zone"].unique()
