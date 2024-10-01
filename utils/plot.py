@@ -164,8 +164,12 @@ class HeatMap:
                     zone_parts = zone.split("|")
                     zone_title = zone_parts[0] if isinstance(zone_parts, list) else zone
                     title = f'{self.title} - {zone_title}'
-                    flux_type = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
+                    flux_type, _ = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax)
+                    print("\n\n\n")
+                    print(f"{flux_type =}")
                     bottom_labels = [label.get_text() for label in ax.get_xticklabels()]
+                    print(f"{bottom_labels =}")
+                    print("\n\n\n")
                     top_labels = [flux_type.pop(0) for _ in bottom_labels if flux_type]
                     ax.set_xticks(ax.get_xticks())
                     ax.set_xticklabels(top_labels, rotation=45, fontsize=self.sizefont)
@@ -237,7 +241,7 @@ class HeatMap:
                     zone_pivot.columns = [num_to_month[int(col)] for col in zone_pivot.columns]
                     self.order_sign(zone_pivot)
                     title = f'{self.title} - {zone}'
-                    flux_type = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax, month_plot=True)
+                    flux_type, _ = self.plot_heatmap(zone_pivot, ax, title, cbar_ax=cbar_ax, month_plot=True)
                     ax.set_xticklabels(zone_pivot.columns, rotation=45, fontsize=self.sizefont)
 
             else:
