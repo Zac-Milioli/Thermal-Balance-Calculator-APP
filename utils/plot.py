@@ -89,26 +89,35 @@ class HeatMap:
         if self.target_type == 'surface' or month_plot:
             labels = ax.get_xticklabels()
             flux_list = []
-            if self.target_type == 'surface' and month_plot:
-                splited = [label.get_text().split('|') for label in labels]
-                print(f"{splited =}")
-                # flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
-                # flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
-                # splited = [[name[0], name[1].replace('?',' ')] for name in splited]
-                # try:
-                    # splited = [[name[0], name[1].replace(name[1].split(' ')[0], surfaces_rename[name[1].split(' ')[0]])] for name in splited]
-                # except:
-                    # splited = [[name[0], name[1].title()] for name in splited]
-            elif self.target_type == 'surface':
-                splited = [label.get_text().split('|') for label in labels]
-                flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
-                flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
-                try:
-                    splited = [[name[0], name[1].replace(name[1], surfaces_rename[name[1]])] for name in splited]
-                except:
-                    splited = [[name[0], name[1].title()] for name in splited]
-            elif month_plot:
-                splited = [label.get_text().split('?') for label in labels]
+            splited = []
+
+            match (self.target_type, month_plot, self.separate_zones):
+                case ('surface', True, False):
+                    flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
+                    flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
+                    splited = [label.get_text().split('|') for label in labels]
+                    splited = [[name[0], name[1].replace('?', ' ')] for name in splited]
+                    try:
+                        splited = [[name[0], name[1].replace(name[1].split(' ')[0], surfaces_rename[name[1].split(' ')[0]])] for name in splited]
+                    except KeyError:
+                        splited = [[name[0], name[1].title()] for name in splited]
+
+                case ('surface', True, True):
+                    splited = [label.get_text().split('|') for label in labels]
+                    print(f"{splited =}")
+
+                case ('surface', False, _):
+                    splited = [label.get_text().split('|') for label in labels]
+                    flux_names = [label.get_text().split('|')[1].split('?')[0] for label in labels]
+                    flux_list = [surfaces_rename.get(flux, flux) for flux in flux_names]
+                    try:
+                        splited = [[name[0], name[1].replace(name[1], surfaces_rename[name[1]])] for name in splited]
+                    except KeyError:
+                        splited = [[name[0], name[1].title()] for name in splited]
+
+                case (_, True, _):
+                    splited = [label.get_text().split('?') for label in labels]
+
             new_labels = [name[0] for name in splited]
             ax.set_xticklabels(new_labels, rotation=45, fontsize=self.sizefont)
             return flux_list
