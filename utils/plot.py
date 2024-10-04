@@ -149,6 +149,10 @@ class HeatMap:
     def plot_heatmap(self, data, ax, title, cbar_ax=None, month_plot: bool = False):
         colors = ["#FFFFFF", "#496DDB", "#00CC66", "#FFFF00", "#F98016", "#F2002B"] if self.target_type == 'convection' else ["#FFFFFF","#A8DADC","#1D3557","#FFBA49","#EC9A9A","#D13440"]
         cmap = LinearSegmentedColormap.from_list('Custom_cmap', colors)
+        
+        ordered_keys = list(self.rename_gains_losses.keys())
+        data = data.reindex(ordered_keys)
+        
         heatmap = sns.heatmap(data=data, vmax=self.max_val, annot=self.annotate, fmt=self.fmt, vmin=self.min_val, cmap=cmap, linewidths=0, xticklabels=True, yticklabels=True, cbar_ax=cbar_ax, cbar_kws=self.cbar_kws, ax=ax)
         heatmap.set_xlabel('')
         heatmap.set_ylabel('Heat Exchange' if self.lang == 'en-US' else "Trocas de calor")
