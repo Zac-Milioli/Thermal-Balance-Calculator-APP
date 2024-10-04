@@ -11,7 +11,7 @@ surfaces_rename = {
     "solarrad": "Solar\nRad."
 }
 
-surfaces_rename_en = {
+gains_losses_rename_en = {
     "Intfloor +": "Floor +",
     "North Extwall +": "North Ext. Walls +",
     "South Extwall +": "South Ext. Walls +",
@@ -47,7 +47,7 @@ surfaces_rename_en = {
     "Cooling -": "Cooling -"
 }
 
-surfaces_rename_pt = {
+gains_losses_rename_pt = {
     "Intfloor +": "Piso +",
     "North Extwall +": "Paredes Ext. Norte +",
     "South Extwall +": "Paredes Ext. Sul +",
@@ -108,7 +108,7 @@ class HeatMap:
             self.target_type_lang = self.target_type
         self.filename = filename
         self.annotate = annotate
-        self.rename_surf = surfaces_rename_pt if self.lang == 'pt-BR' else surfaces_rename_en
+        self.rename_gains_losses = gains_losses_rename_pt if self.lang == 'pt-BR' else gains_losses_rename_en
         self.num_to_month_lang = num_to_month_br if self.lang == 'pt-BR' else num_to_month
         self.fmt = f'.{fmt}f'
         self.values = values
@@ -161,7 +161,7 @@ class HeatMap:
         else:
             ax.set_xticklabels(ax.get_xticklabels(), rotation=45, fontsize=self.sizefont)
         y_labels = [label.get_text() for label in ax.get_yticklabels()]
-        new_y_labels = [self.rename_surf.get(label, label) for label in y_labels]
+        new_y_labels = [self.rename_gains_losses.get(label, label) for label in y_labels]
         ax.set_yticklabels(new_y_labels, fontsize=self.sizefont)
         if self.target_type == 'surface' or month_plot:
             labels = ax.get_xticklabels()
