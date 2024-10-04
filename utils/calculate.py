@@ -427,7 +427,7 @@ def generate_df(input_dataframe: pd.DataFrame, filename: str, way: str, type_nam
     filename: nome do arquivo
     way: convection/surface
     type_name: _convection_/_surface_
-    zone: lista de zonas (SALA, DORM1, DORM2) ou string
+    zone: lista de zonas [SALA, DORM1, DORM2] ou string
     coverage: annual/monthly/daily
     pbar: barra de progresso
     """

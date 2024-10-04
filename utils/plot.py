@@ -11,6 +11,78 @@ surfaces_rename = {
     "solarrad": "Solar\nRad."
 }
 
+surfaces_rename_en = {
+    "Intfloor +": "Floor +",
+    "North Extwall +": "North Ext. Walls +",
+    "South Extwall +": "South Ext. Walls +",
+    "East Extwall +": "East Ext. Walls +",
+    "West Extwall +": "West Ext. Walls +",
+    "North Extwindow +": "North Windows +",
+    "South Extwindow +": "South Windows +",
+    "East Extwindow +": "East Windows +",
+    "West Extwindow +": "West Windows +",
+    "North Intwall +": "North Int. Walls +",
+    "South Intwall +": "South Int. Walls +",
+    "East Intwall +": "East Int. Walls +",
+    "West Intwall +": "West Int. Walls +",
+    "Vn Interzone +": "NV Internal +",
+    "Vn Window +": "NV Window +",
+    "Heating +": "Heating +",
+    "Extroof -": "Roof -",
+    "Intfloor -": "Floor -",
+    "North Extwall -": "North Ext. Walls -",
+    "South Extwall -": "South Ext. Walls -",
+    "East Extwall -": "East Ext. Walls -",
+    "West Extwall -": "West Ext. Walls -",
+    "North Extwindow -": "North Windows -",
+    "South Extwindow -": "South Windows -",
+    "East Extwindow -": "East Windows -",
+    "West Extwindow -": "West Windows -",
+    "North Intwall -": "North Int. Walls -",
+    "South Intwall -": "South Int. Walls -",
+    "East Intwall -": "East Int. Walls -",
+    "West Intwall -": "West Int. Walls -",
+    "Vn Interzone -": "NV Internal -",
+    "Vn Window -": "NV Window -",
+    "Cooling -": "Cooling -"
+}
+
+surfaces_rename_pt = {
+    "Intfloor +": "Piso +",
+    "North Extwall +": "Paredes Ext. Norte +",
+    "South Extwall +": "Paredes Ext. Sul +",
+    "East Extwall +": "Paredes Ext. Leste +",
+    "West Extwall +": "Paredes Ext. Oeste +",
+    "North Extwindow +": "Janelas Norte +",
+    "South Extwindow +": "Janelas Sul +",
+    "East Extwindow +": "Janelas Leste +",
+    "West Extwindow +": "Janelas Oeste +",
+    "North Intwall +": "Paredes Int. Norte +",
+    "South Intwall +": "Paredes Int. Sul +",
+    "East Intwall +": "Paredes Int. Leste +",
+    "West Intwall +": "Paredes Int. Oeste +",
+    "Vn Interzone +": "VN Interna +",
+    "Vn Window +": "VN Janela +",
+    "Heating +": "Aquecimento +",
+    "Extroof -": "Cobertura -",
+    "Intfloor -": "Piso -",
+    "North Extwall -": "Paredes Ext. Norte -",
+    "South Extwall -": "Paredes Ext. Sul -",
+    "East Extwall -": "Paredes Ext. Leste -",
+    "West Extwall -": "Paredes Ext. Oeste -",
+    "North Extwindow -": "Janelas Norte -",
+    "South Extwindow -": "Janelas Sul -",
+    "East Extwindow -": "Janelas Leste -",
+    "West Extwindow -": "Janelas Oeste -",
+    "North Intwall -": "Paredes Int. Norte -",
+    "South Intwall -": "Paredes Int. Sul -",
+    "East Intwall -": "Paredes Int. Leste -",
+    "West Intwall -": "Paredes Int. Oeste -",
+    "Vn Interzone -": "VN Interna -",
+    "Vn Window -": "VN Janela -",
+    "Cooling -": "Refrigeração -"
+}
+
 values_en_to_pt = {
     'HEI': "índice de troca de calor",
     'value [kWh]': "valor absoluto da troca de calor [kWh]"
@@ -36,6 +108,7 @@ class HeatMap:
             self.target_type_lang = self.target_type
         self.filename = filename
         self.annotate = annotate
+        self.rename_surf = surfaces_rename_pt if self.lang == 'pt-BR' else surfaces_rename_en
         self.num_to_month_lang = num_to_month_br if self.lang == 'pt-BR' else num_to_month
         self.fmt = f'.{fmt}f'
         self.values = values
@@ -87,7 +160,9 @@ class HeatMap:
             ax.set_xticklabels([])
         else:
             ax.set_xticklabels(ax.get_xticklabels(), rotation=45, fontsize=self.sizefont)
-        ax.set_yticklabels(ax.get_yticklabels(), fontsize=self.sizefont)
+        y_labels = [label.get_text() for label in ax.get_yticklabels()]
+        new_y_labels = [self.rename_surf.get(label, label) for label in y_labels]
+        ax.set_yticklabels(new_y_labels, fontsize=self.sizefont)
         if self.target_type == 'surface' or month_plot:
             labels = ax.get_xticklabels()
             flux_list = []
