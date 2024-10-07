@@ -70,7 +70,7 @@ def read_db_and_build_dicts(selected_zones, way: str, pbar: st.progress) -> dict
     result = cursor.fetchall()
     zones_dict = {}
     for i in result:
-        zones_dict[i[1]] = i[0]
+        zones_dict[i[1].replace("_", '-')] = i[0]
     surfaces_dict = {}
     for key, value in zones_dict.items():
         cursor.execute(f"SELECT ZoneIndex, SurfaceName, ClassName, Azimuth, ExtBoundCond FROM Surfaces WHERE ZoneIndex={value};")
