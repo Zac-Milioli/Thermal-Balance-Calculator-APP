@@ -2,5 +2,6 @@
 __pycache__
 cache/*
 output/*.png
+output/*.csv
 venv
 OUTPUTS_EX
