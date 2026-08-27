@@ -112,10 +112,8 @@ def read_db_and_build_dicts(selected_zones, way: str, pbar: st.progress) -> dict
     dicionario = {}
     for zone, dataframe in surfaces_dict.items():
         dicionario[zone] = {'convection': {}, 'surface': {}}
-        match way:
-            case 'convection':    
-                for zone_specific, zone_transform in zone_addons.items():
-                    dicionario[zone]['convection'][f"{zone}:{zone_specific}"] = zone_transform
+        for zone_specific, zone_transform in zone_addons.items():
+            dicionario[zone][way][f"{zone}:{zone_specific}"] = zone_transform
         for idx in dataframe.index:
             surf_name = dataframe.at[idx, 'SurfaceName']
             surf_type = dataframe.at[idx, 'ClassName']
@@ -382,14 +380,14 @@ def daily_manipulator(df: pd.DataFrame, days_list: list, name: str, way: str, zo
         soma = hei_organizer(df=soma, way=way, zone=zone)
         soma.to_csv(cache_path+'_datetime'+unique_datetime+'.csv', sep=',')
     df_total = concatenator()
-    df_total = df_total[['Date/Time', 'month', 'day', 'hour', 'flux', 'zone', 'gains_losses', 'value', 'HEI', 'case']]
+    df_total = df_total[['Date/Time', 'month', 'day', 'hour', 'flux', 'zone', 'gains_losses', 'heat_direction', 'value', 'HEI', 'case']]
     return df_total
 
 
 def calculate_module_total_and_hei(df: pd.DataFrame) -> pd.DataFrame:
     """Cálculo do HEI em si
     df: pd.DataFrame"""
-    module_total = df.groupby('zone')['absolute'].transform('sum')
+    module_total = df.groupby(['zone', 'heat_direction'])['absolute'].transform('sum')
     df['HEI'] = df['absolute'] / module_total
     return df
 
